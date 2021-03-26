@@ -21,7 +21,7 @@ impl Prepared {
 
     /// Suorita muunnos. Taulukon koon on oltava sama, kuin millä tämä instanssi
     /// valmisteltiin.
-    fn fft(&self, array: &mut [Complex]) {
+    pub fn fft(&self, array: &mut [Complex]) {
         assert!(array.len() == self.size);
         // Lomitus. Indeksit vaihdetaan siten, että niiden binääriesitys käännetään.
         for index in 0..self.size {
@@ -37,7 +37,7 @@ impl Prepared {
                 for i in 0..half_width {
                     let l = array[pos + i];
                     let r = array[pos + half_width + i];
-                    let r = r * Complex::euler(-PI / i as Num);
+                    let r = r * Complex::euler(-(i as Num) * PI / half_width as Num);
                     array[pos + i] = l + r;
                     array[pos + half_width + i] = l - r;
                 }
@@ -47,7 +47,7 @@ impl Prepared {
 
     /// Suorita käänteismuunnos. Taulukon koon on oltava sama, kuin millä tämä
     /// instanssi valmisteltiin.
-    fn ifft(&self, array: &mut [Complex]) {
+    pub fn ifft(&self, array: &mut [Complex]) {
         assert!(array.len() == self.size);
         self.fft(array);
         // Käänteismuunnos on muuten sama, paitsi lopputuloksen indeksit
@@ -55,6 +55,11 @@ impl Prepared {
         // taulukko käännetään nollan jälkeen ympäri.
         for index in 1..(self.size / 2) {
             array.swap(index, self.size - index);
+        }
+        // ...ja lopuksi tulos kerrotaan normalisointikertoimella että käänteismuunnos
+        // tosiaankin toimii käänteismuunnoksena.
+        for z in array.iter_mut() {
+            *z = *z / self.size as Num;
         }
     }
 }
