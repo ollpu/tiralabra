@@ -5,8 +5,8 @@
 // Sallitaan siis "kuollut koodi".
 #![allow(dead_code)]
 
-use std::ops::{Add, Sub, Neg, Mul, Div};
 use std::fmt;
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 /// Lukujen tyyppi. Tästä voidaan tarvittaessa vaihtaa tuplatarkkuuteen (f64).
 pub type Num = f32;

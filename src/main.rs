@@ -1,10 +1,11 @@
+#![warn(clippy::cognitive_complexity)]
+#![warn(missing_docs)]
 
+mod correlation_match;
 mod fft;
 mod math;
-mod correlation_match;
 
 #[cfg(test)]
 mod test;
 
-fn main() {
-}
+fn main() {}

@@ -1,6 +1,5 @@
-
-use crate::math::*;
 use super::util::*;
+use crate::math::*;
 
 #[test]
 fn abs_of_1_plus_i_is_sqrt_2() {
@@ -12,7 +11,10 @@ fn abs_of_1_plus_i_is_sqrt_2() {
 #[test]
 fn simple_complex_multiplication() {
     let a: Complex = Complex { real: 1., imag: 1. };
-    let b: Complex = Complex { real: -1., imag: 1. };
+    let b: Complex = Complex {
+        real: -1.,
+        imag: 1.,
+    };
     let product = a * b;
     assert!(complex_eq(product, (-2., 0.), 6));
 }
@@ -20,7 +22,10 @@ fn simple_complex_multiplication() {
 #[test]
 fn simple_complex_division() {
     let a = Complex { real: 1., imag: 2. };
-    let b = Complex { real: -1., imag: 1. };
+    let b = Complex {
+        real: -1.,
+        imag: 1.,
+    };
     let quotient = a / b;
     assert!(complex_eq(quotient, (0.5, -1.5), 6));
 }
@@ -28,5 +33,5 @@ fn simple_complex_division() {
 #[test]
 fn simple_euler() {
     let z = Complex::euler(PI / 4.);
-    assert!(complex_eq(z, (1./2f32.sqrt(), 1./2f32.sqrt()), 6));
+    assert!(complex_eq(z, (1. / 2f32.sqrt(), 1. / 2f32.sqrt()), 6));
 }

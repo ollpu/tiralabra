@@ -14,4 +14,3 @@
 //!
 //! on minimaalinen. Tässä `w(x)` on painofunktio, jonka avulla voidaan esimerkiksi
 //! painottaa oskilloskoopin näkymän keskikohtia enemmän kuin reunoja.
-

@@ -1,0 +1,5 @@
+# clippyä käytetään koodin laadun tarkastamiseen.
+# Tässä säädetään vain asetuksia, varsinaiset lintit
+# laitetaan päälle/pois tiedoston `src/main.rs` alussa.
+
+cognitive-complexity-threshold = 25

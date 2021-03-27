@@ -14,9 +14,7 @@ impl Prepared {
     /// Valmistele FFT. Koon on oltava kahden potenssi.
     pub fn new(size: usize) -> Self {
         assert!(size.count_ones() == 1);
-        Prepared {
-            size
-        }
+        Prepared { size }
     }
 
     /// Suorita muunnos. Taulukon koon on oltava sama, kuin millä tämä instanssi
@@ -63,4 +61,3 @@ impl Prepared {
         }
     }
 }
-
