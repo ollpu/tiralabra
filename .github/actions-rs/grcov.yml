@@ -1,3 +1,4 @@
 ingore:
   - "/*"
   - "src/test/*"
+output-path: ./lcov.info
