@@ -6,8 +6,8 @@ FFT-algoritmin.
 Projektilla on nyt [GitHub workflow](https://github.com/ollpu/tiralabra/actions/workflows/coverage.yml),
 joka suorittaa testit ja raportoi testien kattavuuden Codecoviin. Tämän pystyttämisessä
 kesti muutama tunti, kun valmiita esimerkkejä ei ollut kovin montaa. Testikattavuuden
-raportointi vaikuttaisi toimivan ainakin riittävän hyvin - kattavuus onkin
-nyt vain 77 %, koska en kirjoittanut kaikille kompleksilukuluokan metodeille testejä.
+raportointi vaikuttaisi kuitenkin toimivan riittävän hyvin Rustin kanssa - kattavuus
+onkin nyt vain 77 %, koska en kirjoittanut kaikille kompleksilukuluokan metodeille testejä.
 
 Koodin muotoiluun ja tyylin seurantaan otin käyttöön rustfmt:n ja Clippyn. Näiden
 konfiguraatiotiedostot löytyvät projektin juuresta, tosin oletusasetukset
@@ -18,13 +18,13 @@ https://ollpu.github.io/tiralabra/.
 
 FFT:n toteutus löytyy (toistaiseksi) tiedostosta [`src/fft.rs`](/src/fft.rs).
 En vielä lähtenyt optimoimaan toteutusta esimerkiksi esilaskemalla twiddle-kertoimia,
-mutta kirjoitin muutamia [yksikkötestejä](/src/test/test_fft.rs) jotta optimointia ja
+mutta kirjoitin muutamia [yksikkötestejä](/src/test/test_fft.rs), jotta optimointia ja
 refaktorointia on helppo lähteä tekemään myöhemmin.
 
 Lisäksi pohdin hieman tarkemmin ydinalgoritmin toteutusta. Kirjoitus löytyy
 [täältä](https://ollpu.github.io/tiralabra/tiralabra/correlation_match/index.html).
 (Kirjoitan tämän myöhemmin selkeämmin - pelkkä markdown ei oikein sovellu matemaattiseen
-notaatioon.)
+notaatioon.) Tämän toteuttaminen on varmaankin seuraava työnvaihe.
 
 Ajankäyttö: yheensä noin 12 tuntia.
 
