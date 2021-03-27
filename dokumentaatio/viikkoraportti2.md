@@ -21,7 +21,12 @@ En vielä lähtenyt optimoimaan toteutusta esimerkiksi esilaskemalla twiddle-ker
 mutta kirjoitin muutamia [yksikkötestejä](/src/test/test_fft.rs) jotta optimointia ja
 refaktorointia on helppo lähteä tekemään myöhemmin.
 
-Lisäksi pohdin hieman tarkemmin ydinalgoritmin toteutusta.
+Lisäksi pohdin hieman tarkemmin ydinalgoritmin toteutusta. Kirjoitus löytyy
+[täältä](https://ollpu.github.io/tiralabra/tiralabra/correlation_match/index.html).
+(Kirjoitan tämän myöhemmin selkeämmin - pelkkä markdown ei oikein sovellu matemaattiseen
+notaatioon.)
+
+Ajankäyttö: yheensä noin 12 tuntia.
 
 **Kysymys:** Koodia kirjoittaessa askarrutti, että kun projektin kielenä on suomi,
 niin pitäisikö myös esim. funktiot ja muuttujat nimetä suomekielisesti? Tämä ei tunnu
