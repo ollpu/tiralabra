@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Prepared","Etukäteen alustettava rakenne, joka sisältää twiddle-kertoimet tietylle muunnoksen koolle. Toistaiseksi tähän ei tallenneta mitään, vaan kaikki lasketaan varsinaisessa rutiinissa."]]});
