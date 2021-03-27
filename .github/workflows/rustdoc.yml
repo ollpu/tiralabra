@@ -22,7 +22,11 @@ jobs:
         components: rustfmt, rust-src
 
     - name: Build documentation
-      run: cargo doc --all --no-deps
+      run: cargo doc --all --no-deps --index-page
+
+    - name: Create index redirect
+      run: |
+        echo '<meta http-equiv="Refresh" content="0; URL=tiralabra/" />' > target/doc/index.html
 
     - name: Deploy docs
       uses: JamesIves/github-pages-deploy-action@4.1.0
