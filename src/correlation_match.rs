@@ -14,3 +14,11 @@
 //!
 //! on minimaalinen. Tässä `w(x)` on painofunktio, jonka avulla voidaan esimerkiksi
 //! painottaa oskilloskoopin näkymän keskikohtia enemmän kuin reunoja.
+//!
+//! Jos tämä summa esitetään muodossa
+//!
+//! `w(x) * A[x+t]^2 - 2(w(x) * B[x]) * A[x+t] + w(x) * B[x]^2`,
+//!
+//! nähdään, että se voidaan laskea kahtena ristikorrelaationa (summat x:n yli muotoa
+//! `f(x) * g(x+t)`) ja yhtenä suorana tulona (summa x:n yli muotoa `f(x) * g(x)`).
+
