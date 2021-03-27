@@ -1,9 +1,9 @@
 on: [push]
 
-name: Tests and coverage
+name: CI
 jobs:
-  coverage:
-    name: Run test coverage
+  ci:
+    name: Run tests and report coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
