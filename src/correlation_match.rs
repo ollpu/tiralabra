@@ -1,3 +1,5 @@
+//! Design sketch in Finnish:
+//!
 //! Algoritmi, joka etsii pidemmästä äänenpätkästä A sen kohdan, jossa
 //! lyhyempi äänenpätkä B esiintyy kaikista lähimpänä.
 //!
@@ -22,3 +24,21 @@
 //! nähdään, että se voidaan laskea kahtena ristikorrelaationa (summat x:n yli muotoa
 //! `f(x) * g(x+t)`) ja yhtenä suorana tulona (summa x:n yli muotoa `f(x) * g(x)`).
 
+use crate::fft;
+
+pub struct Prepared {
+    base_size: usize,
+    fft: fft::Prepared,
+
+}
+
+impl Prepared {
+    pub fn new(max_size: usize) -> Self {
+        let base_size = max_size.next_power_of_two();
+        let fft_size = base_size * 2;
+        Prepared {
+            base_size,
+            fft: fft::Prepared::new(fft_size),
+        }
+    }
+}

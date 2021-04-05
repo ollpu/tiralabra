@@ -87,8 +87,7 @@ impl Widget for Plot {
         entity
     }
     fn on_draw(&mut self, state: &mut State, entity: Entity, canvas: &mut Canvas<OpenGl>) {
-        state.insert_event(Event::new(WindowEvent::Redraw));
-        entity.set_text(state, "");
+        state.insert_event(Event::new(WindowEvent::Redraw).target(Entity::root()));
         let mut path = Path::new();
         let buf = self.consume_handle.read();
         let mut points = buf.iter().enumerate().map(|(i, v)| {

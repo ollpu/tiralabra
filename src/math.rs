@@ -15,6 +15,9 @@ pub type Num = f32;
 /// The pi constant. If necessary, can be defined by hand later.
 pub const PI: Num = std::f32::consts::PI;
 
+/// The imaginary unit "i".
+pub const IMAG_UNIT: Complex = Complex { real: 0., imag: 1. };
+
 /// A complex number.
 #[derive(Copy, Clone)]
 pub struct Complex {
