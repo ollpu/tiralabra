@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["PI","Pii-vakio. Tarvittaessa voidaan määritellä käsin."]],"struct":[["Complex","Kompleksiluku."]],"type":[["Num","Lukujen tyyppi. Tästä voidaan tarvittaessa vaihtaa tuplatarkkuuteen (f64)."]]});

@@ -147,24 +147,32 @@
 <span id="144">144</span>
 <span id="145">145</span>
 <span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! Tässä moduulissa toteutetaan matemaattisia operaatiota, ja määritellään</span>
-<span class="doccomment">//! reaaliluvuille sekä kompleksiluvuille tyypit.</span>
+<span class="doccomment">//! This module defines mathematical structures and operations, primarily relating</span>
+<span class="doccomment">//! to complex numbers.</span>
 
-<span class="comment">// Projekti on kesken, eikä kaikkia toteutettuja operaatioita vielä käytetä missään.</span>
-<span class="comment">// Sallitaan siis &quot;kuollut koodi&quot;.</span>
+<span class="comment">// The project is being worked on, and not all operations defined in this file are</span>
+<span class="comment">// used anywhere yet. Therefore we allow &quot;dead code&quot;.</span>
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">Div</span>, <span class="ident">Mul</span>, <span class="ident">Neg</span>, <span class="ident">Sub</span>};
 
-<span class="doccomment">/// Lukujen tyyppi. Tästä voidaan tarvittaessa vaihtaa tuplatarkkuuteen (f64).</span>
+<span class="doccomment">/// The primary type of real numbers. This may be switched to double precision if</span>
+<span class="doccomment">/// necessary.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Num</span> <span class="op">=</span> <span class="ident">f32</span>;
 
-<span class="doccomment">/// Pii-vakio. Tarvittaessa voidaan määritellä käsin.</span>
+<span class="doccomment">/// The pi constant. If necessary, can be defined by hand later.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PI</span>: <span class="ident">Num</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">f32</span>::<span class="ident">consts</span>::<span class="ident">PI</span>;
 
-<span class="doccomment">/// Kompleksiluku.</span>
+<span class="doccomment">/// The imaginary unit &quot;i&quot;.</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IMAG_UNIT</span>: <span class="ident">Complex</span> <span class="op">=</span> <span class="ident">Complex</span> { <span class="ident">real</span>: <span class="number">0.</span>, <span class="ident">imag</span>: <span class="number">1.</span> };
+
+<span class="doccomment">/// A complex number.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Complex</span> {
     <span class="kw">pub</span> <span class="ident">real</span>: <span class="ident">Num</span>,
@@ -172,7 +180,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Complex</span> {
-    <span class="doccomment">/// Kompleksi konjugaatti.</span>
+    <span class="doccomment">/// The complex conjugate.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">conj</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Complex</span> {
             <span class="ident">real</span>: <span class="self">self</span>.<span class="ident">real</span>,
@@ -180,17 +188,17 @@
         }
     }
 
-    <span class="doccomment">/// Itseisarvon neliö.</span>
+    <span class="doccomment">/// Square of the absolute value.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">abs2</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Num</span> {
         <span class="self">self</span>.<span class="ident">real</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">real</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">imag</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">imag</span>
     }
 
-    <span class="doccomment">/// Itseisarvo.</span>
+    <span class="doccomment">/// Absolute value.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">abs</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Num</span> {
         <span class="self">self</span>.<span class="ident">abs2</span>().<span class="ident">sqrt</span>()
     }
 
-    <span class="doccomment">/// Eulerin kaava eli</span>
+    <span class="doccomment">/// Euler&#39;s formula,</span>
     <span class="doccomment">/// `e^(ix) = cos x + i sin x`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">euler</span>(<span class="ident">x</span>: <span class="ident">Num</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Complex</span> {
@@ -200,7 +208,7 @@
     }
 }
 
-<span class="doccomment">/// Määrittelee muunnoksen parista lukuja kompleksiluvuksi.</span>
+<span class="doccomment">/// Defines a conversion from a pair of real numbers into a complex number.</span>
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="ident">Num</span>, <span class="ident">Num</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Complex</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">pair</span>: (<span class="ident">Num</span>, <span class="ident">Num</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Complex</span> {
         <span class="ident">Complex</span> {
@@ -210,7 +218,7 @@
     }
 }
 
-<span class="doccomment">/// Esittää kompleksiluvun tekstimuodossa, jotakuinkin &quot;(a + bi)&quot;.</span>
+<span class="doccomment">/// Displays a complex number in text form, akin to &quot;(a + bi)&quot;.</span>
 <span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Complex</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">imag</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0.</span> {
@@ -221,7 +229,7 @@
     }
 }
 
-<span class="comment">// Alla määritellään peruslaskutoimitukset kompleksiluvuille.</span>
+<span class="comment">// Basic mathematical operators are defined for complex numbers below.</span>
 
 <span class="kw">impl</span> <span class="ident">Add</span> <span class="kw">for</span> <span class="ident">Complex</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
@@ -286,12 +294,12 @@
 <span class="kw">impl</span> <span class="ident">Div</span> <span class="kw">for</span> <span class="ident">Complex</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
     <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span> {
-        <span class="kw">let</span> <span class="ident">jaettava</span> <span class="op">=</span> <span class="ident">Complex</span> {
+        <span class="kw">let</span> <span class="ident">dividend</span> <span class="op">=</span> <span class="ident">Complex</span> {
             <span class="ident">real</span>: <span class="self">self</span>.<span class="ident">real</span> <span class="op">*</span> <span class="ident">other</span>.<span class="ident">real</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">imag</span> <span class="op">*</span> <span class="ident">other</span>.<span class="ident">imag</span>,
             <span class="ident">imag</span>: <span class="self">self</span>.<span class="ident">imag</span> <span class="op">*</span> <span class="ident">other</span>.<span class="ident">real</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">real</span> <span class="op">*</span> <span class="ident">other</span>.<span class="ident">imag</span>,
         };
-        <span class="kw">let</span> <span class="ident">jakaja</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">abs2</span>();
-        <span class="ident">jaettava</span> <span class="op">/</span> <span class="ident">jakaja</span>
+        <span class="kw">let</span> <span class="ident">divisor</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">abs2</span>();
+        <span class="ident">dividend</span> <span class="op">/</span> <span class="ident">divisor</span>
     }
 }
 </pre></div>

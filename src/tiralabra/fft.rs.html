@@ -63,40 +63,38 @@
 <span id="60">60</span>
 <span id="61">61</span>
 <span id="62">62</span>
-<span id="63">63</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! Tässä moduulissa toteutetaan FFT eli Fast Fourier Transform, sekä sen</span>
-<span class="doccomment">//! käänteismuunnos.</span>
+<span class="doccomment">//! This module implements the FFT, i.e. Fast Fourier Transform, and its inverse.</span>
 
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">math</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Etukäteen alustettava rakenne, joka sisältää twiddle-kertoimet tietylle</span>
-<span class="doccomment">/// muunnoksen koolle. Toistaiseksi tähän ei tallenneta mitään, vaan kaikki</span>
-<span class="doccomment">/// lasketaan varsinaisessa rutiinissa.</span>
+<span class="doccomment">/// A structure that is initialized beforehand, and contains twiddle-factors for</span>
+<span class="doccomment">/// a specific transform size. For now, nothing is saved here and everything is</span>
+<span class="doccomment">/// computed in the main routine.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Prepared</span> {
     <span class="ident">size</span>: <span class="ident">usize</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Prepared</span> {
-    <span class="doccomment">/// Valmistele FFT. Koon on oltava kahden potenssi.</span>
+    <span class="doccomment">/// Prepare FFT. Size has to be a power of two.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">size</span>.<span class="ident">count_ones</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span>);
         <span class="ident">Prepared</span> { <span class="ident">size</span> }
     }
 
-    <span class="doccomment">/// Suorita muunnos. Taulukon koon on oltava sama, kuin millä tämä instanssi</span>
-    <span class="doccomment">/// valmisteltiin.</span>
+    <span class="doccomment">/// Perform the transform. The size of the array has to be the same as what</span>
+    <span class="doccomment">/// this instance was prepared with.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fft</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">array</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">Complex</span>]) {
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">array</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">size</span>);
-        <span class="comment">// Lomitus. Indeksit vaihdetaan siten, että niiden binääriesitys käännetään.</span>
+        <span class="comment">// Interlacing. Indexes are permuted such that their binary representation is reversed.</span>
         <span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="number">0</span>..<span class="self">self</span>.<span class="ident">size</span> {
             <span class="kw">let</span> <span class="ident">reversed</span> <span class="op">=</span> <span class="ident">index</span>.<span class="ident">reverse_bits</span>() <span class="op">&gt;</span><span class="op">&gt;</span> (<span class="self">self</span>.<span class="ident">size</span>.<span class="ident">leading_zeros</span>() <span class="op">+</span> <span class="number">1</span>);
             <span class="kw">if</span> <span class="ident">reversed</span> <span class="op">&gt;</span> <span class="ident">index</span> {
                 <span class="ident">array</span>.<span class="ident">swap</span>(<span class="ident">index</span>, <span class="ident">reversed</span>);
             }
         }
-        <span class="comment">// &quot;Perhoskuvio&quot;, eli varsinainen lasku. Suoritetaan jokaiselle koolle</span>
-        <span class="comment">// 2, 4, 8 ... kasvavassa järjestyksessä.</span>
+        <span class="comment">// The &quot;butterfly figure&quot; - the main computation. Performed for each size</span>
+        <span class="comment">// 2, 4, 8 ... in increasing order.</span>
         <span class="kw">for</span> <span class="ident">half_width</span> <span class="kw">in</span> (<span class="number">0</span>..).<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">e</span>).<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">w</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">size</span>) {
             <span class="kw">for</span> <span class="ident">pos</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">size</span>).<span class="ident">step_by</span>(<span class="number">2</span> <span class="op">*</span> <span class="ident">half_width</span>) {
                 <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">half_width</span> {
@@ -110,19 +108,19 @@
         }
     }
 
-    <span class="doccomment">/// Suorita käänteismuunnos. Taulukon koon on oltava sama, kuin millä tämä</span>
-    <span class="doccomment">/// instanssi valmisteltiin.</span>
+    <span class="doccomment">/// Perform the inverse transform. The size of the array has to be the same as</span>
+    <span class="doccomment">/// what this instance was prepared with.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ifft</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">array</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">Complex</span>]) {
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">array</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">size</span>);
         <span class="self">self</span>.<span class="ident">fft</span>(<span class="ident">array</span>);
-        <span class="comment">// Käänteismuunnos on muuten sama, paitsi lopputuloksen indeksit</span>
-        <span class="comment">// vaihdetaan niiden vasataluvuiksi modulo koko, eli käytännössä</span>
-        <span class="comment">// taulukko käännetään nollan jälkeen ympäri.</span>
+        <span class="comment">// The inverse transform is otherwise identical, except the indexes of</span>
+        <span class="comment">// the result have to be inverted modulo size, in practive meaning that</span>
+        <span class="comment">// the range [1..size[ is reversed.</span>
         <span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="number">1</span>..(<span class="self">self</span>.<span class="ident">size</span> <span class="op">/</span> <span class="number">2</span>) {
             <span class="ident">array</span>.<span class="ident">swap</span>(<span class="ident">index</span>, <span class="self">self</span>.<span class="ident">size</span> <span class="op">-</span> <span class="ident">index</span>);
         }
-        <span class="comment">// ...ja lopuksi tulos kerrotaan normalisointikertoimella että käänteismuunnos</span>
-        <span class="comment">// tosiaankin toimii käänteismuunnoksena.</span>
+        <span class="comment">// ...and finally, the result is multiplied with a normalization factor</span>
+        <span class="comment">// so that the inverse transform actually restores the original array.</span>
         <span class="kw">for</span> <span class="ident">z</span> <span class="kw">in</span> <span class="ident">array</span>.<span class="ident">iter_mut</span>() {
             <span class="kw-2">*</span><span class="ident">z</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">z</span> <span class="op">/</span> <span class="self">self</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">Num</span>;
         }
