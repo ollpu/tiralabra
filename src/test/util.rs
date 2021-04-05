@@ -1,20 +1,20 @@
 use crate::math::{Complex, Num};
 
-/// Varmistaa, `a` poikkeaa luvusta `b` korkeintaan `precision` merkitsevää
-/// desimaalia. `b` on n.s. oikea vastaus, eli merkitsevien desimaalien määrä
-/// lasketaan siitä.
+/// Ensures that `a` differs from the number `b` by at most `precision` significant
+/// digits. `b` is the "correct answer", so the relative error is computed based on
+/// its magnitude.
 pub fn float_eq(a: Num, b: Num, precision: u32) -> bool {
-    // Muutetaan luvut ensin tuplatarkkuisiksi, että vertailussa ei synny
-    // turhaan enempää virhettä.
+    // We convert the numbers into double precision first, so that no further
+    // errors are introduced while comparing.
     let a = a as f64;
     let b = b as f64;
-    let relative_error = (a - b).abs() / b;
+    let relative_error = ((a - b) / b).abs();
     let log_error = relative_error.log10();
     log_error < -(precision as f64)
 }
 
-/// Sama kuin `float_eq`, mutta kompleksiluvuille. Suhteellinen virhe lasketaan
-/// kompleksiluvun `b` itseisarvon perusteella.
+/// Similar to `float_eq`, but for complex numbers. Relative error is computed
+/// based on the magnitude of `b`.
 pub fn complex_eq(a: Complex, b: impl Into<Complex>, precision: u32) -> bool {
     let b = b.into();
     let (a_re, a_im) = (a.real as f64, a.imag as f64);
@@ -25,12 +25,12 @@ pub fn complex_eq(a: Complex, b: impl Into<Complex>, precision: u32) -> bool {
     log_error < -(precision as f64)
 }
 
-/// Muuntaa listan pareista (luku, luku) listaksi kompleksilukuja.
+/// Converts an array of pairs (Num, Num) into an array of complex numbers.
 pub fn complex_vec<T: Into<Complex> + Clone>(slice: &[T]) -> Vec<Complex> {
     slice.iter().cloned().map(|p| p.into()).collect()
 }
 
-/// Suorittaa vertailun käyttäen `complex_eq` jokaiselle listan alkiolle.
+/// Performs a comparison using `complex_eq` for each element in the arrays.
 pub fn complex_slice_eq(a: &[Complex], b: &[Complex], precision: u32) -> bool {
     assert!(a.len() == b.len());
     a.iter()

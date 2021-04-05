@@ -1,20 +1,21 @@
-//! Tässä moduulissa toteutetaan matemaattisia operaatiota, ja määritellään
-//! reaaliluvuille sekä kompleksiluvuille tyypit.
+//! This module defines mathematical structures and operations, primarily relating
+//! to complex numbers.
 
-// Projekti on kesken, eikä kaikkia toteutettuja operaatioita vielä käytetä missään.
-// Sallitaan siis "kuollut koodi".
+// The project is being worked on, and not all operations defined in this file are
+// used anywhere yet. Therefore we allow "dead code".
 #![allow(dead_code)]
 
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-/// Lukujen tyyppi. Tästä voidaan tarvittaessa vaihtaa tuplatarkkuuteen (f64).
+/// The primary type of real numbers. This may be switched to double precision if
+/// necessary.
 pub type Num = f32;
 
-/// Pii-vakio. Tarvittaessa voidaan määritellä käsin.
+/// The pi constant. If necessary, can be defined by hand later.
 pub const PI: Num = std::f32::consts::PI;
 
-/// Kompleksiluku.
+/// A complex number.
 #[derive(Copy, Clone)]
 pub struct Complex {
     pub real: Num,
@@ -22,7 +23,7 @@ pub struct Complex {
 }
 
 impl Complex {
-    /// Kompleksi konjugaatti.
+    /// The complex conjugate.
     pub fn conj(self) -> Self {
         Complex {
             real: self.real,
@@ -30,17 +31,17 @@ impl Complex {
         }
     }
 
-    /// Itseisarvon neliö.
+    /// Square of the absolute value.
     pub fn abs2(self) -> Num {
         self.real * self.real + self.imag * self.imag
     }
 
-    /// Itseisarvo.
+    /// Absolute value.
     pub fn abs(self) -> Num {
         self.abs2().sqrt()
     }
 
-    /// Eulerin kaava eli
+    /// Euler's formula,
     /// `e^(ix) = cos x + i sin x`.
     pub fn euler(x: Num) -> Self {
         Complex {
@@ -50,7 +51,7 @@ impl Complex {
     }
 }
 
-/// Määrittelee muunnoksen parista lukuja kompleksiluvuksi.
+/// Defines a conversion from a pair of real numbers into a complex number.
 impl From<(Num, Num)> for Complex {
     fn from(pair: (Num, Num)) -> Complex {
         Complex {
@@ -60,7 +61,7 @@ impl From<(Num, Num)> for Complex {
     }
 }
 
-/// Esittää kompleksiluvun tekstimuodossa, jotakuinkin "(a + bi)".
+/// Displays a complex number in text form, akin to "(a + bi)".
 impl fmt::Debug for Complex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.imag >= 0. {
@@ -71,7 +72,7 @@ impl fmt::Debug for Complex {
     }
 }
 
-// Alla määritellään peruslaskutoimitukset kompleksiluvuille.
+// Basic mathematical operators are defined for complex numbers below.
 
 impl Add for Complex {
     type Output = Self;
@@ -136,11 +137,11 @@ impl Mul for Complex {
 impl Div for Complex {
     type Output = Self;
     fn div(self, other: Self) -> Self::Output {
-        let jaettava = Complex {
+        let dividend = Complex {
             real: self.real * other.real + self.imag * other.imag,
             imag: self.imag * other.real - self.real * other.imag,
         };
-        let jakaja = other.abs2();
-        jaettava / jakaja
+        let divisor = other.abs2();
+        dividend / divisor
     }
 }

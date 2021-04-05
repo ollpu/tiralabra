@@ -1,35 +1,34 @@
-//! Tässä moduulissa toteutetaan FFT eli Fast Fourier Transform, sekä sen
-//! käänteismuunnos.
+//! This module implements the FFT, i.e. Fast Fourier Transform, and its inverse.
 
 use crate::math::*;
 
-/// Etukäteen alustettava rakenne, joka sisältää twiddle-kertoimet tietylle
-/// muunnoksen koolle. Toistaiseksi tähän ei tallenneta mitään, vaan kaikki
-/// lasketaan varsinaisessa rutiinissa.
+/// A structure that is initialized beforehand, and contains twiddle-factors for
+/// a specific transform size. For now, nothing is saved here and everything is
+/// computed in the main routine.
 pub struct Prepared {
     size: usize,
 }
 
 impl Prepared {
-    /// Valmistele FFT. Koon on oltava kahden potenssi.
+    /// Prepare FFT. Size has to be a power of two.
     pub fn new(size: usize) -> Self {
         assert!(size.count_ones() == 1);
         Prepared { size }
     }
 
-    /// Suorita muunnos. Taulukon koon on oltava sama, kuin millä tämä instanssi
-    /// valmisteltiin.
+    /// Perform the transform. The size of the array has to be the same as what
+    /// this instance was prepared with.
     pub fn fft(&self, array: &mut [Complex]) {
         assert!(array.len() == self.size);
-        // Lomitus. Indeksit vaihdetaan siten, että niiden binääriesitys käännetään.
+        // Interlacing. Indexes are permuted such that their binary representation is reversed.
         for index in 0..self.size {
             let reversed = index.reverse_bits() >> (self.size.leading_zeros() + 1);
             if reversed > index {
                 array.swap(index, reversed);
             }
         }
-        // "Perhoskuvio", eli varsinainen lasku. Suoritetaan jokaiselle koolle
-        // 2, 4, 8 ... kasvavassa järjestyksessä.
+        // The "butterfly figure" - the main computation. Performed for each size
+        // 2, 4, 8 ... in increasing order.
         for half_width in (0..).map(|e| 1 << e).take_while(|w| *w < self.size) {
             for pos in (0..self.size).step_by(2 * half_width) {
                 for i in 0..half_width {
@@ -43,19 +42,19 @@ impl Prepared {
         }
     }
 
-    /// Suorita käänteismuunnos. Taulukon koon on oltava sama, kuin millä tämä
-    /// instanssi valmisteltiin.
+    /// Perform the inverse transform. The size of the array has to be the same as
+    /// what this instance was prepared with.
     pub fn ifft(&self, array: &mut [Complex]) {
         assert!(array.len() == self.size);
         self.fft(array);
-        // Käänteismuunnos on muuten sama, paitsi lopputuloksen indeksit
-        // vaihdetaan niiden vasataluvuiksi modulo koko, eli käytännössä
-        // taulukko käännetään nollan jälkeen ympäri.
+        // The inverse transform is otherwise identical, except the indexes of
+        // the result have to be inverted modulo size, in practive meaning that
+        // the range [1..size[ is reversed.
         for index in 1..(self.size / 2) {
             array.swap(index, self.size - index);
         }
-        // ...ja lopuksi tulos kerrotaan normalisointikertoimella että käänteismuunnos
-        // tosiaankin toimii käänteismuunnoksena.
+        // ...and finally, the result is multiplied with a normalization factor
+        // so that the inverse transform actually restores the original array.
         for z in array.iter_mut() {
             *z = *z / self.size as Num;
         }
