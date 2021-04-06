@@ -29,7 +29,8 @@ fn err_fn(err: cpal::StreamError) {
 }
 
 /// Hard-coded to read pieces of size 44100/60 for now.
-const N: usize = 735;
+const N: usize = 2*735;
+const M: usize = 2*360;
 
 struct PlotIngest {
     publish_handle: triple_buffer::Input<[f32; N]>,
@@ -57,16 +58,29 @@ impl PlotIngest {
     }
 }
 
+use tiralabra::correlation_match::CorrelationMatch;
 struct Plot {
     consume_handle: triple_buffer::Output<[f32; N]>,
+    correlation_matcher: CorrelationMatch,
+    last_displayed: [f32; M],
+    weight: [f32; M],
 }
 
 impl Plot {
     pub fn new_and_ingestor(_sample_rate: u32) -> (Self, PlotIngest) {
         let buffer = triple_buffer::TripleBuffer::new([0.; N]);
         let (buf_in, buf_out) = buffer.split();
+        let mut weight = [0.; M];
+        for (i, w) in weight.iter_mut().enumerate() {
+            *w = 1. + (2.*std::f32::consts::PI* (i-M/2) as f32 / M as f32).cos()
+        }
         (
-            Plot { consume_handle: buf_out },
+            Plot {
+                consume_handle: buf_out,
+                correlation_matcher: CorrelationMatch::new(N),
+                last_displayed: [0.; M],
+                weight,
+            },
             PlotIngest {
                 publish_handle: buf_in,
                 buffer: Vec::with_capacity(N),
@@ -90,8 +104,12 @@ impl Widget for Plot {
         state.insert_event(Event::new(WindowEvent::Redraw).target(Entity::root()));
         let mut path = Path::new();
         let buf = self.consume_handle.read();
-        let mut points = buf.iter().enumerate().map(|(i, v)| {
-            (i as f32, 200.-v*200.)
+        let offset = self.correlation_matcher.compute(buf, &self.last_displayed, &self.weight) as usize;
+        for (i, tr) in self.last_displayed.iter_mut().enumerate() {
+            *tr = buf[i + offset];
+        }
+        let mut points = self.last_displayed.iter().enumerate().map(|(i, v)| {
+            (1. * i as f32, 200.-v*200.)
         });
         let (x, y) = points.next().unwrap();
         path.move_to(x, y);
