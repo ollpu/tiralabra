@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["tiralabra"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/std/panic/trait.RefUnwindSafe.html\" title=\"trait std::panic::RefUnwindSafe\">RefUnwindSafe</a> for <a class=\"struct\" href=\"tiralabra/correlation_match/struct.CorrelationMatch.html\" title=\"struct tiralabra::correlation_match::CorrelationMatch\">CorrelationMatch</a>","synthetic":true,"types":["tiralabra::correlation_match::CorrelationMatch"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

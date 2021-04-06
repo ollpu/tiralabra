@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["tiralabra"] = [{"text":"impl Freeze for <a class=\"struct\" href=\"tiralabra/correlation_match/struct.CorrelationMatch.html\" title=\"struct tiralabra::correlation_match::CorrelationMatch\">CorrelationMatch</a>","synthetic":true,"types":["tiralabra::correlation_match::CorrelationMatch"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
