@@ -10,13 +10,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     eprintln!("Käytetään äänilaitetta: \"{}\"", device.name()?);
     let mut config: cpal::StreamConfig = device.default_input_config()?.into();
     config.channels = 1;
-    let (mut plot, mut plot_ingest) = Plot::new_and_ingestor(config.sample_rate.0);
+    let (plot, mut plot_ingest) = Plot::new_and_ingestor(config.sample_rate.0);
     let audio_cb = move |data: &[f32], _: &cpal::InputCallbackInfo| {
         plot_ingest.process(data);
     };
     let input_stream = device.build_input_stream(&config, audio_cb, err_fn)?;
     input_stream.play()?;
-    let mut app = Application::new(move |state, window| {
+    let app = Application::new(move |state, window| {
         //state.insert_theme(THEME);
         plot.build(state, window.entity(), |builder| builder.set_flex_grow(1.0));
         window.set_title("Tiralabra demo").set_inner_size(800, 600);
@@ -72,7 +72,7 @@ impl Plot {
         let (buf_in, buf_out) = buffer.split();
         let mut weight = [0.; M];
         for (i, w) in weight.iter_mut().enumerate() {
-            *w = 1. + (2.*std::f32::consts::PI* (i-M/2) as f32 / M as f32).cos()
+            *w = 1. + (2.*std::f32::consts::PI* (i as isize - (M/2) as isize) as f32 / M as f32).cos()
         }
         (
             Plot {
@@ -100,13 +100,13 @@ impl Widget for Plot {
         //state.style.insert_element(entity, "element");
         entity
     }
-    fn on_draw(&mut self, state: &mut State, entity: Entity, canvas: &mut Canvas<OpenGl>) {
+    fn on_draw(&mut self, state: &mut State, _entity: Entity, canvas: &mut Canvas<OpenGl>) {
         state.insert_event(Event::new(WindowEvent::Redraw).target(Entity::root()));
         let mut path = Path::new();
         let buf = self.consume_handle.read();
         let offset = self.correlation_matcher.compute(buf, &self.last_displayed, &self.weight) as usize;
         for (i, tr) in self.last_displayed.iter_mut().enumerate() {
-            *tr = buf[i + offset];
+            *tr = 0.5 * buf[i + offset] + 0.5 * *tr;
         }
         let mut points = self.last_displayed.iter().enumerate().map(|(i, v)| {
             (1. * i as f32, 200.-v*200.)
