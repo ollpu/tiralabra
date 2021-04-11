@@ -31,7 +31,7 @@ jobs:
       - name: Install grcov
         run: if [[ ! -e ~/.cargo/bin/grcov ]]; then cargo install grcov; fi
       - name: Run tests
-        run: cargo test
+        run: cargo test --no-default-features
         env:
           RUSTFLAGS: '-Zinstrument-coverage'
       - name: Run grcov

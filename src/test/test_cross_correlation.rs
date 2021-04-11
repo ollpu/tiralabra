@@ -1,5 +1,4 @@
 use super::util::*;
-use crate::math::*;
 use crate::cross_correlation::CrossCorrelation;
 
 #[test]
