@@ -1,0 +1,30 @@
+
+control {
+  border-width: 2px;
+  border-color: #383838;
+  padding: 10px;
+  margin-left: -2px;
+  margin-top: -2px;
+  margin-bottom: -2px;
+}
+
+label {
+  height: 12px;
+  color: #ffffff;
+}
+
+.check {
+  margin-bottom: 20px;
+}
+.check label {
+  align-self: center;
+  flex-grow: 1;
+  margin-left: 5px;
+}
+
+
+control slider {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+

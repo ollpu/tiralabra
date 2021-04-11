@@ -3,6 +3,26 @@
 [![CI](https://github.com/ollpu/tiralabra/actions/workflows/coverage.yml/badge.svg)](https://github.com/ollpu/tiralabra/actions/workflows/coverage.yml)
 [![codecov](https://codecov.io/gh/ollpu/tiralabra/branch/main/graph/badge.svg?token=NXYLTIWRUU)](https://codecov.io/gh/ollpu/tiralabra)
 
+## Suorittaminen
+
+Asenna ensin Rust ja Cargo-paketinhallinta: https://rustup.rs/
+
+Voit ajaa demon suorittamalla (grafiikkakirjastojen kääntämisessä kestää jonkin aikaa)
+
+```sh
+cargo run --example demo
+```
+
+"Vakauta"-valintaruudulla itse algoritmin saa päälle tai pois. Vaimenemisajan liu'ut
+eivät vielä toimi.
+
+
+Testit voidaan ajaa suorittamalla
+
+```sh
+cargo test --no-default-features
+```
+
 ## Dokumentaatio
 
 #### [Koodin dokumentaatio](https://ollpu.github.io/tiralabra)
