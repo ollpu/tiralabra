@@ -24,8 +24,8 @@
 //! nähdään, että se voidaan laskea kahtena ristikorrelaationa (summat x:n yli muotoa
 //! `f(x+t) * g(x)`) ja yhtenä suorana tulona (summa x:n yli muotoa `f(x) * g(x)`).
 
-use crate::math::*;
 use crate::cross_correlation::CrossCorrelation;
+use crate::math::*;
 
 pub struct CorrelationMatch {
     max_size: usize,
@@ -66,9 +66,12 @@ impl CorrelationMatch {
         for (g, &w) in self.g_buffer.iter_mut().zip(w.iter()) {
             *g = w;
         }
-        let cross_correlation_result = 
-            self.cross_correlation.compute_truncated(&self.f_buffer, &self.g_buffer);
-        for (result, cross_correlation_result) in self.result_buffer.iter_mut().zip(cross_correlation_result) {
+        let cross_correlation_result = self
+            .cross_correlation
+            .compute_truncated(&self.f_buffer, &self.g_buffer);
+        for (result, cross_correlation_result) in
+            self.result_buffer.iter_mut().zip(cross_correlation_result)
+        {
             *result += cross_correlation_result;
         }
         // Compute term -2(w[x] * b[x]) * a[x+t]. f = a, g = w[x] * b[x]
@@ -78,9 +81,12 @@ impl CorrelationMatch {
         for (g, (&w, &b)) in self.g_buffer.iter_mut().zip(w.iter().zip(b.iter())) {
             *g = w * b;
         }
-        let cross_correlation_result = 
-            self.cross_correlation.compute_truncated(&self.f_buffer, &self.g_buffer);
-        for (result, cross_correlation_result) in self.result_buffer.iter_mut().zip(cross_correlation_result) {
+        let cross_correlation_result = self
+            .cross_correlation
+            .compute_truncated(&self.f_buffer, &self.g_buffer);
+        for (result, cross_correlation_result) in
+            self.result_buffer.iter_mut().zip(cross_correlation_result)
+        {
             *result -= 2. * cross_correlation_result;
         }
         // Compute term w[x] * b[x]^2. This is constant in t, so it shouldn't affect

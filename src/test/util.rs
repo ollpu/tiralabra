@@ -20,8 +20,9 @@ pub fn complex_eq(a: Complex, b: impl Into<Complex>, precision: u32) -> bool {
     let b = b.into();
     let (a_re, a_im) = (a.real as f64, a.imag as f64);
     let (b_re, b_im) = (b.real as f64, b.imag as f64);
-    let relative_error =
-        (((a_re - b_re).powi(2) + (a_im - b_im).powi(2)) / (b_re.powi(2) + b_im.powi(2)).max(1.)).sqrt();
+    let relative_error = (((a_re - b_re).powi(2) + (a_im - b_im).powi(2))
+        / (b_re.powi(2) + b_im.powi(2)).max(1.))
+    .sqrt();
     let log_error = relative_error.log10();
     log_error < -(precision as f64)
 }

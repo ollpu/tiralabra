@@ -1,7 +1,7 @@
 //! Computes cross correlation efficiently, using FFT.
 
-use crate::math::*;
 use crate::fft;
+use crate::math::*;
 use std::array::IntoIter;
 
 pub struct CrossCorrelation {
@@ -29,13 +29,14 @@ impl CrossCorrelation {
     /// Length of `a` and `b` must not exceed the maximum size given in `new`.
     /// Returns an interator of the results. The length of the result is `a.len() + b.len() - 1`.
     #[allow(dead_code)]
-    pub fn compute(&mut self, a: &[Num], b: &[Num]) -> impl Iterator<Item=Num> + '_ {
+    pub fn compute(&mut self, a: &[Num], b: &[Num]) -> impl Iterator<Item = Num> + '_ {
         self.compute_raw(a, b);
         // The beginning of the result is read from the end of the buffer, rest normally
         // from the beginning of the buffer.
         // This is to correctly output the partially overlapping positions on the left
         // as well.
-        self.buffer[self.fft_size-b.len()+1..].iter()
+        self.buffer[self.fft_size - b.len() + 1..]
+            .iter()
             .chain(self.buffer[..a.len()].iter())
             .map(|z| z.real)
     }
@@ -43,11 +44,10 @@ impl CrossCorrelation {
     /// Compute cross correlation excluding partially overlapping positions.
     /// Length of `a` and `b` must not exceed the maximum size given in `new`.
     /// Returns an interator of the results. The length of the result is `a.len() - b.len() + 1`.
-    pub fn compute_truncated(&mut self, a: &[Num], b: &[Num]) -> impl Iterator<Item=Num> + '_ {
+    pub fn compute_truncated(&mut self, a: &[Num], b: &[Num]) -> impl Iterator<Item = Num> + '_ {
         assert!(a.len() >= b.len());
         self.compute_raw(a, b);
-        self.buffer[..a.len() - b.len() + 1].iter()
-            .map(|z| z.real)
+        self.buffer[..a.len() - b.len() + 1].iter().map(|z| z.real)
     }
 
     /// Performs the computation without extracting results from the `buffer`.
@@ -65,13 +65,12 @@ impl CrossCorrelation {
         // The cross correlation requires computing a[w] * conj(b[w]) for each frequency,
         // and then taking the inverse FFT.
         use std::iter;
-        for (zk, (ak, bk)) in
-            self.buffer.iter_mut().zip(
-                a.iter().cloned().chain(iter::repeat(0.)).zip(
-                    b.iter().cloned().chain(iter::repeat(0.))
-                )
-            )
-        {
+        for (zk, (ak, bk)) in self.buffer.iter_mut().zip(
+            a.iter()
+                .cloned()
+                .chain(iter::repeat(0.))
+                .zip(b.iter().cloned().chain(iter::repeat(0.))),
+        ) {
             *zk = (ak, bk).into();
         }
 
@@ -82,7 +81,10 @@ impl CrossCorrelation {
         // a[0] = a[-0] and a[N/2] = a[-N/2] so they must be handled separately.
         for zw in IntoIter::new([&mut left[0], &mut right[0]]) {
             let Complex { real: aw, imag: bw } = *zw;
-            *zw = Complex { real: aw * bw, imag: 0. };
+            *zw = Complex {
+                real: aw * bw,
+                imag: 0.,
+            };
         }
         for (zw, zmw) in left[1..].iter_mut().zip(right[1..].iter_mut().rev()) {
             // zw = z[w], zmw = z[-w]

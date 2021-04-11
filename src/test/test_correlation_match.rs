@@ -18,14 +18,14 @@ fn simple_correlation_match() {
 #[test]
 fn random_correlation_match() {
     const N: usize = 1024;
-    const M: usize = N/4;
+    const M: usize = N / 4;
 
     let mut rng = SmallRng::seed_from_u64(42);
     let mut a = vec![0.; N];
     rng.fill(&mut a[..]);
 
     let mut matcher = CorrelationMatch::new(N);
-    let pos = rng.gen_range(1..N-M);
+    let pos = rng.gen_range(1..N - M);
     let w = vec![1.; M];
     let offset = matcher.compute(&a, &a[pos..][..M], &w);
     assert!(float_eq(offset, pos as f32, 1));
