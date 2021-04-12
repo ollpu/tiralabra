@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         state.add_theme(style::themes::DEFAULT_THEME);
         state.add_theme(THEME);
         window.set_flex_direction(state, FlexDirection::Row);
-        Control {}.build(state, window.entity(), |builder| {
+        Control::default().build(state, window.entity(), |builder| {
             builder
                 .set_width(Length::Percentage(0.2))
                 .set_min_width(Length::Pixels(200.))
@@ -43,6 +43,7 @@ fn err_fn(err: cpal::StreamError) {
 #[derive(Clone, PartialEq, Debug)]
 enum PlotControlEvent {
     Stabilize(bool),
+    ShowMemory(bool),
     DisplayDecayTime(f32),
     MemoryDecayTime(f32),
 }
@@ -85,12 +86,14 @@ struct Plot {
     memory: [f32; M],
     weight: [f32; M],
     stabilize_enabled: bool,
+    show_memory: bool,
     display_decay: f32,
     memory_decay: f32,
 }
 
 fn decay_time_to_factor(time: f32) -> f32 {
-    (-1. / 30. / time).exp()
+    // arbitrary constant that gives a useful range
+    1. - (-1. / 6. / time).exp()
 }
 
 impl Plot {
@@ -111,8 +114,9 @@ impl Plot {
                 memory: [0.; M],
                 weight,
                 stabilize_enabled: true,
-                display_decay: decay_time_to_factor(0.1),
-                memory_decay: decay_time_to_factor(0.1),
+                show_memory: false,
+                display_decay: decay_time_to_factor(0.2),
+                memory_decay: decay_time_to_factor(0.2),
             },
             PlotIngest {
                 publish_handle: buf_in,
@@ -138,7 +142,6 @@ impl Widget for Plot {
         let h = state.data.get_height(entity);
         let w = state.data.get_width(entity);
 
-        let mut path = Path::new();
         let buf = self.consume_handle.read();
         let offset;
         if self.stabilize_enabled {
@@ -158,6 +161,21 @@ impl Widget for Plot {
         for (i, tr) in self.memory.iter_mut().enumerate() {
             *tr = factor * buf[i + offset] + (1. - factor) * *tr;
         }
+        if self.show_memory {
+            let mut path = Path::new();
+            let mut points = self
+                .memory
+                .iter()
+                .enumerate()
+                .map(|(i, v)| (x + w / M as f32 * i as f32, y + h / 2. - v * h / 2.));
+            let (x, y) = points.next().unwrap();
+            path.move_to(x, y);
+            for (x, y) in points {
+                path.line_to(x, y);
+            }
+            canvas.stroke_path(&mut path, Paint::color(Color::rgb(12, 120, 230)));
+        }
+        let mut path = Path::new();
         let mut points = self
             .last_displayed
             .iter()
@@ -177,6 +195,9 @@ impl Widget for Plot {
                 PlotControlEvent::Stabilize(enable) => {
                     self.stabilize_enabled = *enable;
                 }
+                PlotControlEvent::ShowMemory(enable) => {
+                    self.show_memory = *enable;
+                }
                 PlotControlEvent::DisplayDecayTime(val) => {
                     self.display_decay = decay_time_to_factor(*val);
                 }
@@ -190,7 +211,9 @@ impl Widget for Plot {
 }
 
 #[derive(Default)]
-struct Control {}
+struct Control {
+    memory_slider: Entity
+}
 
 impl Widget for Control {
     type Ret = Entity;
@@ -205,24 +228,44 @@ impl Widget for Control {
             )
             .build(state, checkbox, |builder| builder);
         Label::new("Vakauta").build(state, checkbox, |builder| builder);
+        let checkbox = HBox::new().build(state, entity, |builder| builder.class("check"));
+        Checkbox::new(false)
+            .on_checked(Event::new(PlotControlEvent::ShowMemory(true)).propagate(Propagation::All))
+            .on_unchecked(Event::new(PlotControlEvent::ShowMemory(false)).propagate(Propagation::All))
+            .build(state, checkbox, |builder| builder);
+        Label::new("Näytä muisti").build(state, checkbox, |builder| builder);
         Label::new("Näytön vaimenemisaika").build(state, entity, |builder| builder);
         Slider::new()
             .with_min(0.)
-            .with_max(5.)
+            .with_max(2.)
             .with_initial_value(0.2)
-            .on_change(|val| {
-                Event::new(PlotControlEvent::DisplayDecayTime(val)).propagate(Propagation::All)
+            .on_change(move |val| {
+                Event::new(PlotControlEvent::DisplayDecayTime(val)).propagate(Propagation::All).target(entity)
             })
             .build(state, entity, |builder| builder);
         Label::new("Muistin vaimenemisaika").build(state, entity, |builder| builder);
-        Slider::new()
+        self.memory_slider = Slider::new()
             .with_min(0.)
-            .with_max(5.)
+            .with_max(2.)
             .with_initial_value(0.2)
-            .on_change(|val| {
-                Event::new(PlotControlEvent::MemoryDecayTime(val)).propagate(Propagation::All)
+            .on_change(move |val| {
+                Event::new(PlotControlEvent::MemoryDecayTime(val)).propagate(Propagation::All).target(entity)
             })
             .build(state, entity, |builder| builder);
         entity
     }
+
+    // fn on_event(&mut self, state: &mut State, entity: Entity, event: &mut Event) {
+    //     if let Some(mouse_event) = event.message.downcast() {
+    //         match mouse_event {
+    //             WindowEvent::MouseOver if state.hierarchy.event.target == self.memory_slider => {
+    //                 println!("moi");
+    //             }
+    //             WindowEvent::MouseOut if event.target == self.memory_slider => {
+    //                 println!("heips");
+    //             }
+    //             _ => {}
+    //         }
+    //     }
+    // }
 }

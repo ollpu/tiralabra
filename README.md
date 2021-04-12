@@ -10,11 +10,12 @@ Asenna ensin Rust ja Cargo-paketinhallinta: https://rustup.rs/
 Voit ajaa demon suorittamalla (grafiikkakirjastojen kääntämisessä kestää jonkin aikaa)
 
 ```sh
-cargo run --example demo
+cargo run --release --example demo
 ```
 
 "Vakauta"-valintaruudulla itse algoritmin saa päälle tai pois. Vaimenemisajan liu'ut
-eivät vielä toimi.
+vaikuttavat siihen, kuinka nopeasti näytettävä signaali vaihtuu. Muistille on oma liukunsa,
+jotta algoritmi saadaan muistamaan suurpiirteisen aaltomuodon pidempään.
 
 
 Testit voidaan ajaa suorittamalla
