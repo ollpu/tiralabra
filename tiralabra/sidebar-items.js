@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["correlation_match","Design sketch in Finnish:"]]});
+initSidebarItems({"mod":[["correlation_match","Design sketch in Finnish:"],["cross_correlation","Computes cross correlation efficiently, using FFT."],["fft","This module implements the FFT, i.e. Fast Fourier Transform, and its inverse."],["math","This module defines mathematical structures and operations, primarily relating to complex numbers."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Prepared","A structure that is initialized beforehand, and contains twiddle-factors for a specific transform size. For now, nothing is saved here and everything is computed in the main routine."]]});
