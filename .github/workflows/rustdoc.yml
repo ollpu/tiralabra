@@ -22,7 +22,7 @@ jobs:
         components: rustfmt, rust-src
 
     - name: Build documentation
-      run: cargo doc --all --no-deps --no-default-features
+      run: cargo doc --all --no-deps --no-default-features --document-private-items
 
     - name: Create index redirect
       run: cp .github/index_redirect.html target/doc/index.html
