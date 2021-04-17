@@ -20,3 +20,4 @@ default = ["gui"]
 [[example]]
 name = "demo"
 required-features = ["gui"]
+

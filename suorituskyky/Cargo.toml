@@ -1,0 +1,20 @@
+[package]
+name = "suorituskyky"
+version = "0.1.0"
+authors = ["Roope Salmi <rpsalmi@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+tiralabra = { path = "..", default-features = false }
+
+[dev-dependencies]
+rand = { version = "0.8", default-features = false, features = ["std", "small_rng"] }
+criterion = { version = "0.3", features = ["html_reports", "cargo_bench_support"] }
+
+[[bench]]
+name = "correlation_match_performance"
+harness = false
+
+[[bench]]
+name = "fft_performance"
+harness = false
