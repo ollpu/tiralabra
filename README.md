@@ -5,9 +5,11 @@
 
 ## Suorittaminen
 
-Asenna ensin Rust ja Cargo-paketinhallinta: https://rustup.rs/
+Valmis binääri on ladattavissa Linuxille [julkaisuista](https://github.com/ollpu/tiralabra/releases).
 
-Voit ajaa demon suorittamalla (grafiikkakirjastojen kääntämisessä kestää jonkin aikaa)
+Jos haluat kääntää demon itse, asenna ensin Rust ja Cargo-paketinhallinta: https://rustup.rs/
+
+Aja sitten demo suorittamalla (grafiikkakirjastojen kääntämisessä kestää jonkin aikaa)
 
 ```sh
 cargo run --release --example demo
