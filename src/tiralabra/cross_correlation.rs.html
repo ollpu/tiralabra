@@ -103,6 +103,7 @@
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
+<span id="103">103</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Computes cross correlation efficiently, using FFT.</span>
 
@@ -110,6 +111,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">math</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">array</span>::<span class="ident">IntoIter</span>;
 
+<span class="doccomment">/// A structure prepared to perform cross correlations up to a given maximum size.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CrossCorrelation</span> {
     <span class="ident">base_size</span>: <span class="ident">usize</span>,
     <span class="ident">fft_size</span>: <span class="ident">usize</span>,

@@ -110,7 +110,12 @@
 <span id="107">107</span>
 <span id="108">108</span>
 <span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
 </pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! Finds the closest match of a shorter piece of audio from a larger piece of audio.</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! Design sketch in Finnish:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Algoritmi, joka etsii pidemmästä äänenpätkästä A sen kohdan, jossa</span>
@@ -140,6 +145,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">cross_correlation</span>::<span class="ident">CrossCorrelation</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">math</span>::<span class="kw-2">*</span>;
 
+<span class="doccomment">/// A structure prepared to perform correlation matches up to a given size.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CorrelationMatch</span> {
     <span class="ident">max_size</span>: <span class="ident">usize</span>,
     <span class="ident">cross_correlation</span>: <span class="ident">CrossCorrelation</span>,

@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["CorrelationMatch",""]]});
+initSidebarItems({"struct":[["CorrelationMatch","A structure prepared to perform correlation matches up to a given size."]]});
