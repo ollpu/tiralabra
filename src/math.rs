@@ -1,5 +1,5 @@
-//! This module defines mathematical structures and operations, primarily relating
-//! to complex numbers.
+//! Defines mathematical structures and operations, primarily relating to complex
+//! numbers.
 
 // The project is being worked on, and not all operations defined in this file are
 // used anywhere yet. Therefore we allow "dead code".

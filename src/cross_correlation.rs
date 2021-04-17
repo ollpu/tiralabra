@@ -4,6 +4,7 @@ use crate::fft;
 use crate::math::*;
 use std::array::IntoIter;
 
+/// A structure prepared to perform cross correlations up to a given maximum size.
 pub struct CrossCorrelation {
     base_size: usize,
     fft_size: usize,

@@ -1,3 +1,5 @@
+//! Finds the closest match of a shorter piece of audio from a larger piece of audio.
+//!
 //! Design sketch in Finnish:
 //!
 //! Algoritmi, joka etsii pidemmästä äänenpätkästä A sen kohdan, jossa
@@ -27,6 +29,7 @@
 use crate::cross_correlation::CrossCorrelation;
 use crate::math::*;
 
+/// A structure prepared to perform correlation matches up to a given size.
 pub struct CorrelationMatch {
     max_size: usize,
     cross_correlation: CrossCorrelation,

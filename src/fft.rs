@@ -1,4 +1,4 @@
-//! This module implements the FFT, i.e. Fast Fourier Transform, and its inverse.
+//! Implements the FFT, i.e. Fast Fourier Transform, and its inverse.
 
 use crate::math::*;
 
