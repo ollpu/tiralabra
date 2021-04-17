@@ -20,16 +20,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let app = Application::new(move |state, window| {
         state.add_theme(style::themes::DEFAULT_THEME);
         state.add_theme(THEME);
-        window.set_flex_direction(state, FlexDirection::Row);
+        window.set_layout_type(state, LayoutType::Horizontal);
         Control::default().build(state, window.entity(), |builder| {
-            builder
-                .set_width(Length::Percentage(0.2))
-                .set_min_width(Length::Pixels(200.))
+            builder.set_width(Stretch(1.)).set_min_width(Pixels(200.))
         });
         plot.build(state, window.entity(), |builder| {
-            builder
-                .set_flex_grow(1.0)
-                .set_align_self(AlignSelf::Stretch)
+            builder.set_width(Stretch(4.)).set_height(Stretch(1.))
         });
         window.set_title("Tiralabra demo").set_inner_size(800, 600);
     });
@@ -116,7 +112,7 @@ impl Plot {
                 stabilize_enabled: true,
                 show_memory: false,
                 display_decay: decay_time_to_factor(0.2),
-                memory_decay: decay_time_to_factor(0.2),
+                memory_decay: decay_time_to_factor(0.8),
             },
             PlotIngest {
                 publish_handle: buf_in,
@@ -137,10 +133,7 @@ impl Widget for Plot {
     }
     fn on_draw(&mut self, state: &mut State, entity: Entity, canvas: &mut Canvas<OpenGl>) {
         state.insert_event(Event::new(WindowEvent::Redraw).target(Entity::root()));
-        let x = state.data.get_posx(entity);
-        let y = state.data.get_posy(entity);
-        let h = state.data.get_height(entity);
-        let w = state.data.get_width(entity);
+        let BoundingBox { x, y, h, w } = state.data.get_bounds(entity);
 
         let buf = self.consume_handle.read();
         let offset;
@@ -152,12 +145,10 @@ impl Widget for Plot {
             offset = 0;
         }
         let factor = self.display_decay;
-        //println!("d{}", factor);
         for (i, tr) in self.last_displayed.iter_mut().enumerate() {
             *tr = factor * buf[i + offset] + (1. - factor) * *tr;
         }
         let factor = self.memory_decay;
-        //println!("f{}", factor);
         for (i, tr) in self.memory.iter_mut().enumerate() {
             *tr = factor * buf[i + offset] + (1. - factor) * *tr;
         }
@@ -173,7 +164,7 @@ impl Widget for Plot {
             for (x, y) in points {
                 path.line_to(x, y);
             }
-            canvas.stroke_path(&mut path, Paint::color(Color::rgb(12, 120, 230)));
+            canvas.stroke_path(&mut path, Paint::color(Color::rgb(12, 170, 255)));
         }
         let mut path = Path::new();
         let mut points = self
@@ -212,7 +203,14 @@ impl Widget for Plot {
 
 #[derive(Default)]
 struct Control {
-    memory_slider: Entity
+    memory_over: bool,
+    memory_press: bool,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+enum MemoryHoverEvent {
+    OverChange(bool),
+    PressChange(bool),
 }
 
 impl Widget for Control {
@@ -220,7 +218,7 @@ impl Widget for Control {
     fn on_build(&mut self, state: &mut State, entity: Entity) -> Self::Ret {
         entity.set_element(state, "control");
         entity.set_flex_direction(state, FlexDirection::Column);
-        let checkbox = HBox::new().build(state, entity, |builder| builder.class("check"));
+        let checkbox = Row::new().build(state, entity, |builder| builder.class("check"));
         Checkbox::new(true)
             .on_checked(Event::new(PlotControlEvent::Stabilize(true)).propagate(Propagation::All))
             .on_unchecked(
@@ -228,44 +226,47 @@ impl Widget for Control {
             )
             .build(state, checkbox, |builder| builder);
         Label::new("Vakauta").build(state, checkbox, |builder| builder);
-        let checkbox = HBox::new().build(state, entity, |builder| builder.class("check"));
-        Checkbox::new(false)
-            .on_checked(Event::new(PlotControlEvent::ShowMemory(true)).propagate(Propagation::All))
-            .on_unchecked(Event::new(PlotControlEvent::ShowMemory(false)).propagate(Propagation::All))
-            .build(state, checkbox, |builder| builder);
-        Label::new("Näytä muisti").build(state, checkbox, |builder| builder);
         Label::new("Näytön vaimenemisaika").build(state, entity, |builder| builder);
         Slider::new()
             .with_min(0.)
             .with_max(2.)
             .with_initial_value(0.2)
-            .on_change(move |val| {
-                Event::new(PlotControlEvent::DisplayDecayTime(val)).propagate(Propagation::All).target(entity)
+            .on_changing(move |val| {
+                Event::new(PlotControlEvent::DisplayDecayTime(val))
+                    .propagate(Propagation::All)
+                    .target(entity)
             })
             .build(state, entity, |builder| builder);
         Label::new("Muistin vaimenemisaika").build(state, entity, |builder| builder);
-        self.memory_slider = Slider::new()
+        Slider::new()
             .with_min(0.)
             .with_max(2.)
-            .with_initial_value(0.2)
-            .on_change(move |val| {
-                Event::new(PlotControlEvent::MemoryDecayTime(val)).propagate(Propagation::All).target(entity)
+            .with_initial_value(0.8)
+            .on_over(Event::new(MemoryHoverEvent::OverChange(true)).direct(entity))
+            .on_out(Event::new(MemoryHoverEvent::OverChange(false)).direct(entity))
+            .on_press(Event::new(MemoryHoverEvent::PressChange(true)).direct(entity))
+            .on_release(Event::new(MemoryHoverEvent::PressChange(false)).direct(entity))
+            .on_changing(move |val| {
+                Event::new(PlotControlEvent::MemoryDecayTime(val))
+                    .propagate(Propagation::All)
+                    .target(entity)
             })
             .build(state, entity, |builder| builder);
         entity
     }
 
-    // fn on_event(&mut self, state: &mut State, entity: Entity, event: &mut Event) {
-    //     if let Some(mouse_event) = event.message.downcast() {
-    //         match mouse_event {
-    //             WindowEvent::MouseOver if state.hierarchy.event.target == self.memory_slider => {
-    //                 println!("moi");
-    //             }
-    //             WindowEvent::MouseOut if event.target == self.memory_slider => {
-    //                 println!("heips");
-    //             }
-    //             _ => {}
-    //         }
-    //     }
-    // }
+    fn on_event(&mut self, state: &mut State, _entity: Entity, event: &mut Event) {
+        if let Some(ev) = event.message.downcast() {
+            match ev {
+                MemoryHoverEvent::OverChange(status) => self.memory_over = *status,
+                MemoryHoverEvent::PressChange(status) => self.memory_press = *status,
+            }
+            state.insert_event(
+                Event::new(PlotControlEvent::ShowMemory(
+                    self.memory_over || self.memory_press,
+                ))
+                .propagate(Propagation::All),
+            );
+        }
+    }
 }
