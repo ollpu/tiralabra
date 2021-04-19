@@ -31,9 +31,11 @@ cargo test --no-default-features
 #### [Koodin dokumentaatio](https://ollpu.github.io/tiralabra)
 #### [Määrittelydokumentti](dokumentaatio/määrittelydokumentti.md)
 #### [Toteutusdokumentti](dokumentaatio/toteutusdokumentti.pdf)
+#### [Testausdokumentti](dokumentaatio/testausdokumentti.md)
 
 ## Viikkoraportit
 
 #### [Viikkoraportti 1](dokumentaatio/viikkoraportti1.md)
 #### [Viikkoraportti 2](dokumentaatio/viikkoraportti2.md)
 #### [Viikkoraportti 3](dokumentaatio/viikkoraportti3.md)
+#### [Viikkoraportti 4](dokumentaatio/viikkoraportti4.md)
