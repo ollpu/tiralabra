@@ -12,7 +12,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let config = device.default_input_config()?;
     let sample_format = config.sample_format();
     let config: cpal::StreamConfig = config.into();
-    let (plot, plot_ingest) = Plot::new_and_ingestor(config.sample_rate.0, config.channels as usize);
+    let (plot, plot_ingest) =
+        Plot::new_and_ingestor(config.sample_rate.0, config.channels as usize);
     match sample_format {
         cpal::SampleFormat::F32 => run_audio::<f32>(device, config, plot_ingest)?,
         cpal::SampleFormat::I16 => run_audio::<i16>(device, config, plot_ingest)?,
@@ -36,12 +37,18 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn err_fn(err: cpal::StreamError) {
     eprintln!("Virhe äänilaitteen kanssa: {}", err);
 }
-fn run_audio<T: cpal::Sample>(device: cpal::Device, config: cpal::StreamConfig, mut plot_ingest: PlotIngest) -> Result<(), Box<dyn Error>> {
+fn run_audio<T: cpal::Sample>(
+    device: cpal::Device,
+    config: cpal::StreamConfig,
+    mut plot_ingest: PlotIngest,
+) -> Result<(), Box<dyn Error>> {
     let audio_cb = move |data: &[T], _: &cpal::InputCallbackInfo| {
         plot_ingest.process(data);
     };
     std::thread::spawn(move || {
-        let input_stream = device.build_input_stream(&config, audio_cb, err_fn).unwrap();
+        let input_stream = device
+            .build_input_stream(&config, audio_cb, err_fn)
+            .unwrap();
         input_stream.play().unwrap();
         std::thread::park();
     });
