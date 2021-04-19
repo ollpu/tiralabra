@@ -13,9 +13,13 @@ pub fn benchmark(c: &mut Criterion) {
     let mut rng = SmallRng::seed_from_u64(12);
     for size in (6..=14).map(|e| 1 << e) {
         let prepared = fft::Prepared::new(size);
-        let mut buffer: Vec<Complex> = (0..size).map(|_| (rng.gen(), rng.gen()).into()).collect();
-        group.bench_with_input(BenchmarkId::new("size", size), &size, |b, _| {
-            b.iter(|| prepared.fft(black_box(&mut buffer)));
+        let initial: Vec<Complex> = (0..size).map(|_| (rng.gen(), rng.gen()).into()).collect();
+        let mut buffer = initial.clone();
+        group.bench_with_input(BenchmarkId::new("versio 1", size), &size, |b, _| {
+            b.iter(|| {
+                buffer[..].copy_from_slice(&initial);
+                prepared.fft(black_box(&mut buffer))
+            });
         });
     }
 }

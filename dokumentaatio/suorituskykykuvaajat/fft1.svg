@@ -1,0 +1,127 @@
+<svg version="1.1" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Gnuplot</title>
+  <desc>Produced by GNUPLOT 5.4 patchlevel 1</desc>
+  <g id="gnuplot_canvas">
+    <rect width="1280" height="720" fill="none"/>
+    <defs>
+      <circle id="gpPt5" r="1" stroke="currentColor" stroke-width=".222"/>
+      <use id="gpPt6" fill="currentColor" xlink:href="#gpPt5"/>
+    </defs>
+    <g color="gray" fill="none" stroke="currentColor" stroke-width=".5">
+      <path class="gridline" d="m89.31 662.4h1072.6" stroke="gray" stroke-dasharray="2,4"/>
+    </g>
+    <g color="black" fill="none">
+      <path d="m89.31 662.4h9" stroke="#000"/>
+      <g transform="translate(80.92 666.3)" fill="#000" font-family="Helvetica" font-size="12" text-anchor="end">
+        <text><tspan font-family="Helvetica">0.001</tspan></text>
+      </g>
+    </g>
+    <g color="black" fill="none" stroke="currentColor">
+      <path d="m89.31 616.61h4.5m-4.5-26.78h4.5m-4.5-19h4.5m-4.5-14.74h4.5m-4.5-12.04h4.5m-4.5-10.19h4.5m-4.5-8.82h4.5m-4.5-7.78h4.5" stroke="#000"/>
+    </g>
+    <g color="gray" fill="none" stroke="currentColor" stroke-width=".5">
+      <path class="gridline" d="m89.31 510.3h1072.6" stroke="gray" stroke-dasharray="2,4"/>
+    </g>
+    <g color="black" fill="none">
+      <path d="m89.31 510.3h9" stroke="#000"/>
+      <g transform="translate(80.92 514.2)" fill="#000" font-family="Helvetica" font-size="12" text-anchor="end">
+        <text><tspan font-family="Helvetica">0.01</tspan></text>
+      </g>
+    </g>
+    <g color="black" fill="none" stroke="currentColor">
+      <path d="m89.31 464.52h4.5m-4.5-26.79h4.5m-4.5-19h4.5m-4.5-14.74h4.5m-4.5-12.04h4.5m-4.5-10.18h4.5m-4.5-8.83h4.5m-4.5-7.78h4.5" stroke="#000"/>
+    </g>
+    <g color="gray" fill="none" stroke="currentColor" stroke-width=".5">
+      <path class="gridline" d="m89.31 358.2h1072.6" stroke="gray" stroke-dasharray="2,4"/>
+    </g>
+    <g color="black" fill="none">
+      <path d="m89.31 358.2h9" stroke="#000"/>
+      <g transform="translate(80.92 362.1)" fill="#000" font-family="Helvetica" font-size="12" text-anchor="end">
+        <text><tspan font-family="Helvetica">0.1</tspan></text>
+      </g>
+    </g>
+    <g color="black" fill="none" stroke="currentColor">
+      <path d="m89.31 312.42h4.5m-4.5-26.78h4.5m-4.5-19.01h4.5m-4.5-14.74h4.5m-4.5-12.04h4.5m-4.5-10.18h4.5m-4.5-8.82h4.5m-4.5-7.78h4.5" stroke="#000"/>
+    </g>
+    <g color="gray" fill="none" stroke="currentColor" stroke-width=".5">
+      <path class="gridline" d="m89.31 206.11h1072.6" stroke="gray" stroke-dasharray="2,4"/>
+    </g>
+    <g color="black" fill="none">
+      <path d="m89.31 206.11h9" stroke="#000"/>
+      <g transform="translate(80.92,210.01)" fill="#000" font-family="Helvetica" font-size="12" text-anchor="end">
+        <text><tspan font-family="Helvetica">1</tspan></text>
+      </g>
+    </g>
+    <g color="black" fill="none" stroke="currentColor">
+      <path d="m89.31 160.32h4.5m-4.5-26.78h4.5m-4.5-19h4.5m-4.5-14.74h4.5m-4.5-12.05h4.5m-4.5-10.18h4.5m-4.5-8.82h4.5m-4.5-7.78h4.5" stroke="#000"/>
+    </g>
+    <g color="gray" fill="none" stroke="currentColor" stroke-width=".5">
+      <path class="gridline" d="m89.31 54.01h1072.6" stroke="gray" stroke-dasharray="2,4"/>
+    </g>
+    <g color="black" fill="none">
+      <path d="m89.31 54.01h9" stroke="#000"/>
+      <g transform="translate(80.92,57.91)" fill="#000" font-family="Helvetica" font-size="12" text-anchor="end">
+        <text><tspan font-family="Helvetica">10</tspan></text>
+      </g>
+    </g>
+    <g color="black" fill="none">
+      <path d="m106.64 662.4v-4.5m25.83 4.5v-4.5m22.79 4.5v-4.5m20.38 4.5v-9" stroke="#000"/>
+      <g transform="translate(175.64 684.3)" fill="#000" font-family="Helvetica" font-size="12" text-anchor="middle">
+        <text><tspan font-family="Helvetica">100</tspan></text>
+      </g>
+    </g>
+    <g color="black" fill="none">
+      <path d="m309.71 662.4v-4.5m78.43 4.5v-4.5m55.65 4.5v-4.5m43.16 4.5v-4.5m35.27 4.5v-4.5m29.82 4.5v-4.5m25.82 4.5v-4.5m22.79 4.5v-4.5m20.38 4.5v-9" stroke="#000"/>
+      <g transform="translate(621.03 684.3)" fill="#000" font-family="Helvetica" font-size="12" text-anchor="middle">
+        <text><tspan font-family="Helvetica">1000</tspan></text>
+      </g>
+    </g>
+    <g color="black" fill="none">
+      <path d="m755.1 662.4v-4.5m78.43 4.5v-4.5m55.65 4.5v-4.5m43.16 4.5v-4.5m35.27 4.5v-4.5m29.82 4.5v-4.5m25.83 4.5v-4.5m22.78 4.5v-4.5m20.38 4.5v-9" stroke="#000"/>
+      <g transform="translate(1066.4 684.3)" fill="#000" font-family="Helvetica" font-size="12" text-anchor="middle">
+        <text><tspan font-family="Helvetica">10000</tspan></text>
+      </g>
+    </g>
+    <g color="black" fill="none" stroke="currentColor">
+      <path d="m89.31 54.01v608.39h1072.6v-608.39h-1072.6z" stroke="#000"/>
+    </g>
+    <g color="black" fill="none" stroke="currentColor">
+      <g transform="translate(19.18,358.21) rotate(270)" fill="#000" font-family="Helvetica" font-size="12" stroke="none" text-anchor="middle">
+        <text font-family="Helvetica" font-size="21.333px" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal"><tspan>Keskimääräinen aika (ms)</tspan></text>
+      </g>
+    </g>
+    <g color="black" fill="none" stroke="currentColor">
+      <g transform="translate(625.61 711.3)" fill="#000" font-family="Helvetica" font-size="12" stroke="none" text-anchor="middle">
+        <text font-family="Helvetica" font-size="21.333px" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal"><tspan>Koko</tspan></text>
+      </g>
+    </g>
+    <g>
+      <title>size</title>
+      <g color="black" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="m1187.1 63.01h42.56m-1140.3 551.86 134.08-58.34 134.07-55.48 134.08-53.96 134.08-52.36 134.07-52.01 134.08-53.41 134.07-50.37 134.08-50.72" stroke="#b22222"/>
+      </g>
+    </g>
+    <g>
+      <title>gnuplot_plot_2</title>
+      <g color="black" fill="none" stroke="currentColor">
+        <use transform="translate(89.31,614.87) scale(3.38)" color="rgb(178,  34,  34)" xlink:href="#gpPt6"/>
+        <use transform="translate(223.39,556.53) scale(3.38)" color="rgb(178,  34,  34)" xlink:href="#gpPt6"/>
+        <use transform="translate(357.46,501.05) scale(3.38)" color="rgb(178,  34,  34)" xlink:href="#gpPt6"/>
+        <use transform="translate(491.54,447.09) scale(3.38)" color="rgb(178,  34,  34)" xlink:href="#gpPt6"/>
+        <use transform="translate(625.62,394.73) scale(3.38)" color="rgb(178,  34,  34)" xlink:href="#gpPt6"/>
+        <use transform="translate(759.69,342.72) scale(3.38)" color="rgb(178,  34,  34)" xlink:href="#gpPt6"/>
+        <use transform="translate(893.77,289.31) scale(3.38)" color="rgb(178,  34,  34)" xlink:href="#gpPt6"/>
+        <use transform="translate(1027.8 238.94) scale(3.38)" color="rgb(178,  34,  34)" xlink:href="#gpPt6"/>
+        <use transform="translate(1161.9 188.22) scale(3.38)" color="rgb(178,  34,  34)" xlink:href="#gpPt6"/>
+      </g>
+    </g>
+    <g color="black" fill="none" stroke="currentColor">
+      <path d="m89.31 54.01v608.39h1072.6v-608.39h-1072.6z" stroke="#000"/>
+    </g>
+    <g color="black" fill="none" stroke="currentColor">
+      <g transform="translate(625.61,30.91)" fill="#000" font-family="Helvetica" font-size="12" stroke="none" text-anchor="middle">
+        <text font-family="Helvetica" font-size="21.333px" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal"><tspan>fft, eri kokoja</tspan></text>
+      </g>
+    </g>
+  </g>
+</svg>
