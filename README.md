@@ -5,7 +5,7 @@
 
 ## Suorittaminen
 
-Valmis binääri on ladattavissa Linuxille [julkaisuista](https://github.com/ollpu/tiralabra/releases).
+Valmis binääri on ladattavissa Linuxille ja Windowsille [julkaisuista](https://github.com/ollpu/tiralabra/releases).
 
 Jos haluat kääntää demon itse, asenna ensin Rust ja Cargo-paketinhallinta: https://rustup.rs/
 
