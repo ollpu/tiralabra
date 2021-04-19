@@ -9,18 +9,19 @@ fn main() -> Result<(), Box<dyn Error>> {
     let host = cpal::default_host();
     let device = host.default_input_device().unwrap();
     eprintln!("Käytetään äänilaitetta: \"{}\"", device.name()?);
-    let mut config: cpal::StreamConfig = device.default_input_config()?.into();
-    config.channels = 1;
-    let (plot, mut plot_ingest) = Plot::new_and_ingestor(config.sample_rate.0);
-    let audio_cb = move |data: &[f32], _: &cpal::InputCallbackInfo| {
-        plot_ingest.process(data);
-    };
-    let input_stream = device.build_input_stream(&config, audio_cb, err_fn)?;
-    input_stream.play()?;
+    let config = device.default_input_config()?;
+    let sample_format = config.sample_format();
+    let config: cpal::StreamConfig = config.into();
+    let (plot, plot_ingest) = Plot::new_and_ingestor(config.sample_rate.0, config.channels as usize);
+    match sample_format {
+        cpal::SampleFormat::F32 => run_audio::<f32>(device, config, plot_ingest)?,
+        cpal::SampleFormat::I16 => run_audio::<i16>(device, config, plot_ingest)?,
+        cpal::SampleFormat::U16 => run_audio::<u16>(device, config, plot_ingest)?,
+    }
     let app = Application::new(move |state, window| {
         state.add_theme(style::themes::DEFAULT_THEME);
         state.add_theme(THEME);
-        window.set_layout_type(state, LayoutType::Horizontal);
+        window.set_layout_type(state, LayoutType::Row);
         Control::default().build(state, window.entity(), |builder| {
             builder.set_width(Stretch(1.)).set_min_width(Pixels(200.))
         });
@@ -34,6 +35,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 fn err_fn(err: cpal::StreamError) {
     eprintln!("Virhe äänilaitteen kanssa: {}", err);
+}
+fn run_audio<T: cpal::Sample>(device: cpal::Device, config: cpal::StreamConfig, mut plot_ingest: PlotIngest) -> Result<(), Box<dyn Error>> {
+    let audio_cb = move |data: &[T], _: &cpal::InputCallbackInfo| {
+        plot_ingest.process(data);
+    };
+    std::thread::spawn(move || {
+        let input_stream = device.build_input_stream(&config, audio_cb, err_fn).unwrap();
+        input_stream.play().unwrap();
+        std::thread::park();
+    });
+    Ok(())
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -49,16 +61,18 @@ const N: usize = 2 * 735;
 const M: usize = 2 * 360;
 
 struct PlotIngest {
+    channels: usize,
     publish_handle: triple_buffer::Input<[f32; N]>,
     buffer: Vec<f32>,
     clock: usize,
 }
 
 impl PlotIngest {
-    fn process(&mut self, data: &[f32]) {
-        for sample in data {
+    fn process<T: cpal::Sample>(&mut self, data: &[T]) {
+        for frame in data.chunks(self.channels) {
             if self.clock < N {
-                self.buffer.push(*sample);
+                let val = frame.iter().map(|v| v.to_f32()).sum::<f32>() / self.channels as f32;
+                self.buffer.push(val);
                 if self.buffer.len() == N {
                     if let Ok(array) = self.buffer[..].try_into() {
                         self.publish_handle.write(array);
@@ -93,7 +107,7 @@ fn decay_time_to_factor(time: f32) -> f32 {
 }
 
 impl Plot {
-    pub fn new_and_ingestor(_sample_rate: u32) -> (Self, PlotIngest) {
+    pub fn new_and_ingestor(_sample_rate: u32, channels: usize) -> (Self, PlotIngest) {
         let buffer = triple_buffer::TripleBuffer::new([0.; N]);
         let (buf_in, buf_out) = buffer.split();
         let mut weight = [0.; M];
@@ -115,6 +129,7 @@ impl Plot {
                 memory_decay: decay_time_to_factor(0.8),
             },
             PlotIngest {
+                channels,
                 publish_handle: buf_in,
                 buffer: Vec::with_capacity(N),
                 clock: 0,
@@ -132,7 +147,7 @@ impl Widget for Plot {
         entity
     }
     fn on_draw(&mut self, state: &mut State, entity: Entity, canvas: &mut Canvas<OpenGl>) {
-        state.insert_event(Event::new(WindowEvent::Redraw).target(Entity::root()));
+        state.insert_event(Event::new(WindowEvent::Redraw).direct(Entity::root()));
         let BoundingBox { x, y, h, w } = state.data.get_bounds(entity);
 
         let buf = self.consume_handle.read();
@@ -217,7 +232,7 @@ impl Widget for Control {
     type Ret = Entity;
     fn on_build(&mut self, state: &mut State, entity: Entity) -> Self::Ret {
         entity.set_element(state, "control");
-        entity.set_flex_direction(state, FlexDirection::Column);
+        entity.set_layout_type(state, LayoutType::Column);
         let checkbox = Row::new().build(state, entity, |builder| builder.class("check"));
         Checkbox::new(true)
             .on_checked(Event::new(PlotControlEvent::Stabilize(true)).propagate(Propagation::All))
