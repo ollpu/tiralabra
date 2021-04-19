@@ -142,8 +142,14 @@ use femtovg::{renderer::OpenGl, Canvas, Color, Paint, Path};
 
 impl Widget for Plot {
     type Ret = Entity;
-    fn on_build(&mut self, _state: &mut State, entity: Entity) -> Self::Ret {
+    fn on_build(&mut self, state: &mut State, entity: Entity) -> Self::Ret {
         //state.style.insert_element(entity, "element");
+        let animation = AnimationState::new()
+            .with_duration(std::time::Duration::from_secs(30000000))
+            .with_keyframe((0.0, Stretch(0.0)))
+            .with_keyframe((0.0, Stretch(5.)));
+        let animation = state.style.border_width.insert_animation(animation);
+        state.style.border_width.play_animation(entity, animation);
         entity
     }
     fn on_draw(&mut self, state: &mut State, entity: Entity, canvas: &mut Canvas<OpenGl>) {
