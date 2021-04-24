@@ -9,6 +9,8 @@ Valmis binääri on ladattavissa Linuxille ja Windowsille [julkaisuista](https:/
 
 Jos haluat kääntää demon itse, asenna ensin Rust ja Cargo-paketinhallinta: https://rustup.rs/
 
+Ubuntulla tai muilla Debian-pohjaisilla tulee myös asentaa ALSA-kirjaston kehitysotsakkeet, eli `sudo apt-get install libasound2-dev`.
+
 Aja sitten demo suorittamalla (grafiikkakirjastojen kääntämisessä kestää jonkin aikaa)
 
 ```sh
