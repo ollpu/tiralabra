@@ -15,10 +15,17 @@ pub fn benchmark(c: &mut Criterion) {
         let prepared = fft::Prepared::new(size);
         let initial: Vec<Complex> = (0..size).map(|_| (rng.gen(), rng.gen()).into()).collect();
         let mut buffer = initial.clone();
-        group.bench_with_input(BenchmarkId::new("versio 1", size), &size, |b, _| {
+        group.bench_with_input(BenchmarkId::new("copy and fft", size), &size, |b, _| {
             b.iter(|| {
                 buffer[..].copy_from_slice(&initial);
                 prepared.fft(black_box(&mut buffer))
+            });
+        });
+        buffer[..].copy_from_slice(&initial);
+        group.bench_with_input(BenchmarkId::new("fft and ifft", size), &size, |b, _| {
+            b.iter(|| {
+                prepared.fft(black_box(&mut buffer));
+                prepared.ifft(black_box(&mut buffer))
             });
         });
     }
