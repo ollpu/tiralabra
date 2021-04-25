@@ -43,11 +43,12 @@ muunnos.
 Toteutin commitissa [`c61e5f`](https://github.com/ollpu/tiralabra/commit/c61e5fa048774b5c045c3f6e9a0a6dd175942291) FFT-
 algoritmiin optimoinnin, jossa esilasketaan sini- ja kosinifunktioita käyttävät kertoimet. Suorituskykytesti
 ei ota esilaskentaa huomioon, sillä normaalissa käytössä esilaskenta tehdään uudestaan vain harvoin.
-Alla molempien suorituskykytestien tulokset ennen ("no-memory-fft") ja jälkeen ("new").
+Alla molempien suorituskykytestien tulokset ennen ("no-memory-fft") ja jälkeen ("new"). Kaikilla
+koilla ja molemmissa testeissä algoritmi nopeutui noin 70 %.
 
 ![](suorituskykykuvaajat/fft_copy_vertailu.png)
 ![](suorituskykykuvaajat/fft_both_vertailu.png)
 
 #### Vanha kuvaaja
 
-![](suorituskykykuvaajat/ff1.svg)
+![](suorituskykykuvaajat/fft1.svg)
