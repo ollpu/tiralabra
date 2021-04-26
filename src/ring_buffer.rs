@@ -7,8 +7,11 @@
 //! wrap around to the beginning if they reach the end. That is why it is called
 //! a "ring".
 
-use std::sync::{Arc, atomic::{AtomicUsize, Ordering}};
 use std::cell::UnsafeCell;
+use std::sync::{
+    atomic::{AtomicUsize, Ordering},
+    Arc,
+};
 
 /// Defines the interface that an item stored in the queue must implement. Only very simple types,
 /// such as floating point numbers or small `struct`s that implement Copy are permitted.
@@ -58,7 +61,14 @@ pub fn with_capacity<T: Item>(capacity: usize) -> (Producer<T>, Consumer<T>) {
         read_index: AtomicUsize::new(0),
         write_index: AtomicUsize::new(0),
     });
-    (Producer { internal: ring_buffer.clone() }, Consumer { internal: ring_buffer })
+    (
+        Producer {
+            internal: ring_buffer.clone(),
+        },
+        Consumer {
+            internal: ring_buffer,
+        },
+    )
 }
 
 impl<T: Item> RingBuffer<T> {
@@ -66,8 +76,16 @@ impl<T: Item> RingBuffer<T> {
         let read_index = self.read_index.load(Ordering::Relaxed);
         let write_index = self.write_index.load(Ordering::Relaxed);
         // Offer one less than allocated capacity
-        let write_limit = if read_index == 0 { self.capacity - 1 } else { read_index - 1 };
-        RingRange { start: write_index, open_end: write_limit, capacity: self.capacity }
+        let write_limit = if read_index == 0 {
+            self.capacity - 1
+        } else {
+            read_index - 1
+        };
+        RingRange {
+            start: write_index,
+            open_end: write_limit,
+            capacity: self.capacity,
+        }
     }
 
     fn consume_available(&self) -> RingRange {
@@ -75,7 +93,11 @@ impl<T: Item> RingBuffer<T> {
         // Ordering::Acquire to ensure that data written to the buffer is visible
         // to this consumer thread. Corresponding Release is in commit_produced.
         let write_index = self.write_index.load(Ordering::Acquire);
-        RingRange { start: read_index, open_end: write_index, capacity: self.capacity }
+        RingRange {
+            start: read_index,
+            open_end: write_index,
+            capacity: self.capacity,
+        }
     }
 
     fn commit_produced(&self, amount: usize) {
@@ -124,7 +146,7 @@ impl<T: Item> Producer<T> {
 
 impl<T: Item> Consumer<T> {
     /// Tries to fill the entirety of the given `data` slice. If there is not enough data
-    /// available, `Err(n)` is returned, where `n < data.len()` is the amount of items available. 
+    /// available, `Err(n)` is returned, where `n < data.len()` is the amount of items available.
     pub fn pop_full(&mut self, data: &mut [T]) -> Result<(), usize> {
         let range = self.internal.consume_available();
         let amount = data.len().min(range.size_hint().0);

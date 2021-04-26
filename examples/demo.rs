@@ -167,9 +167,10 @@ impl Widget for Plot {
 
         while let Ok(_) = self.consume_handle.pop_full(&mut self.buffer) {
             if self.stabilize_enabled {
-                self.offset = self
-                    .correlation_matcher
-                    .compute(&self.buffer, &self.memory, &self.weight) as usize;
+                self.offset =
+                    self.correlation_matcher
+                        .compute(&self.buffer, &self.memory, &self.weight)
+                        as usize;
             }
             let factor = self.memory_decay;
             for (i, tr) in self.memory.iter_mut().enumerate() {

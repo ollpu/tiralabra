@@ -16,9 +16,9 @@ impl Prepared {
         assert!(size.count_ones() == 1);
         let half_size = size / 2;
         let half_size_inverse = 1. / half_size as Num;
-        let twiddle_factors = (0..half_size).map(|i| {
-            Complex::euler(-(i as Num) * half_size_inverse * PI)
-        }).collect();
+        let twiddle_factors = (0..half_size)
+            .map(|i| Complex::euler(-(i as Num) * half_size_inverse * PI))
+            .collect();
         Prepared {
             size,
             twiddle_factors,

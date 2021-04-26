@@ -43,7 +43,7 @@ fn all_possible_read_write_index_combinations() {
         }
         let result = tx.push(&[N]);
         assert_eq!(result, Err(0));
-        let mut array = [N+1];
+        let mut array = [N + 1];
         for v in 0..N {
             rx.pop_full(&mut array).unwrap();
             assert_eq!(array[0], v);
@@ -64,7 +64,7 @@ fn multithreading() {
                     assert_eq!(array, [1, 2, 3, 4]);
                     return;
                 }
-                Err(_) => ()
+                Err(_) => (),
             }
             std::thread::sleep(std::time::Duration::from_millis(1));
         }
