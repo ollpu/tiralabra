@@ -4,7 +4,7 @@
 //! pushed and read at once.
 //!
 //! All data is stored in one contiguous array, where `read_index` and `write_index`
-//! wrap around to the beginning if they reach the end of it. That is why it is called
+//! wrap around to the beginning if they reach the end. That is why it is called
 //! a "ring".
 
 use std::sync::{Arc, atomic::{AtomicUsize, Ordering}};
@@ -107,7 +107,7 @@ impl<T: Item> Producer<T> {
         for (index, value) in range.zip(data.iter()) {
             // SAFETY: The ring buffer read & write indices guarantee the consumer
             // is not currently reading this index of the buffer, so no other references
-            // to it exist.
+            // to it exist. We have a unique mutable reference to self.
             unsafe {
                 let slot = &mut *self.internal.buffer[index].get();
                 *slot = *value;

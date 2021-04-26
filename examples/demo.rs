@@ -1,8 +1,9 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use std::convert::TryInto;
 use std::vec::Vec;
 use std::{error::Error, result::Result};
 use tuix::*;
+
+use tiralabra::ring_buffer;
 
 static THEME: &'static str = include_str!("theme.css");
 fn main() -> Result<(), Box<dyn Error>> {
@@ -69,27 +70,26 @@ const M: usize = 2 * 360;
 
 struct PlotIngest {
     channels: usize,
-    publish_handle: triple_buffer::Input<[f32; N]>,
+    publish_handle: ring_buffer::Producer<f32>,
     buffer: Vec<f32>,
-    clock: usize,
 }
 
 impl PlotIngest {
     fn process<T: cpal::Sample>(&mut self, data: &[T]) {
         for frame in data.chunks(self.channels) {
-            if self.clock < N {
+            if self.buffer.len() < N {
                 let val = frame.iter().map(|v| v.to_f32()).sum::<f32>() / self.channels as f32;
                 self.buffer.push(val);
-                if self.buffer.len() == N {
-                    if let Ok(array) = self.buffer[..].try_into() {
-                        self.publish_handle.write(array);
-                    }
-                    self.buffer.clear();
-                }
             }
-            self.clock += 1;
-            if self.clock == N {
-                self.clock = 0;
+            if self.buffer.len() == N {
+                match self.publish_handle.push(&self.buffer) {
+                    Ok(()) => (), // success
+                    Err(_) => {
+                        // fail, report error for debugging
+                        println!("ring buffer full");
+                    }
+                }
+                self.buffer.clear();
             }
         }
     }
@@ -97,8 +97,10 @@ impl PlotIngest {
 
 use tiralabra::correlation_match::CorrelationMatch;
 struct Plot {
-    consume_handle: triple_buffer::Output<[f32; N]>,
+    consume_handle: ring_buffer::Consumer<f32>,
     correlation_matcher: CorrelationMatch,
+    buffer: [f32; N],
+    offset: usize,
     last_displayed: [f32; M],
     memory: [f32; M],
     weight: [f32; M],
@@ -115,8 +117,7 @@ fn decay_time_to_factor(time: f32) -> f32 {
 
 impl Plot {
     pub fn new_and_ingestor(_sample_rate: u32, channels: usize) -> (Self, PlotIngest) {
-        let buffer = triple_buffer::TripleBuffer::new([0.; N]);
-        let (buf_in, buf_out) = buffer.split();
+        let (publish_handle, consume_handle) = ring_buffer::with_capacity(8 * N);
         let mut weight = [0.; M];
         for (i, w) in weight.iter_mut().enumerate() {
             *w = 1.
@@ -125,8 +126,10 @@ impl Plot {
         }
         (
             Plot {
-                consume_handle: buf_out,
+                consume_handle,
                 correlation_matcher: CorrelationMatch::new(N),
+                buffer: [0.; N],
+                offset: 0,
                 last_displayed: [0.; M],
                 memory: [0.; M],
                 weight,
@@ -137,9 +140,8 @@ impl Plot {
             },
             PlotIngest {
                 channels,
-                publish_handle: buf_in,
+                publish_handle,
                 buffer: Vec::with_capacity(N),
-                clock: 0,
             },
         )
     }
@@ -163,22 +165,21 @@ impl Widget for Plot {
         state.insert_event(Event::new(WindowEvent::Redraw).direct(Entity::root()));
         let BoundingBox { x, y, h, w } = state.data.get_bounds(entity);
 
-        let buf = self.consume_handle.read();
-        let offset;
-        if self.stabilize_enabled {
-            offset = self
-                .correlation_matcher
-                .compute(buf, &self.memory, &self.weight) as usize;
-        } else {
-            offset = 0;
+        while let Ok(_) = self.consume_handle.pop_full(&mut self.buffer) {
+            if self.stabilize_enabled {
+                self.offset = self
+                    .correlation_matcher
+                    .compute(&self.buffer, &self.memory, &self.weight) as usize;
+            }
+            let factor = self.memory_decay;
+            for (i, tr) in self.memory.iter_mut().enumerate() {
+                *tr = factor * self.buffer[i + self.offset] + (1. - factor) * *tr;
+            }
         }
+        // Smooth one per displayed frame. Memory is smoothed once per piece of input data instead.
         let factor = self.display_decay;
         for (i, tr) in self.last_displayed.iter_mut().enumerate() {
-            *tr = factor * buf[i + offset] + (1. - factor) * *tr;
-        }
-        let factor = self.memory_decay;
-        for (i, tr) in self.memory.iter_mut().enumerate() {
-            *tr = factor * buf[i + offset] + (1. - factor) * *tr;
+            *tr = factor * self.buffer[i + self.offset] + (1. - factor) * *tr;
         }
         if self.show_memory {
             let mut path = Path::new();
