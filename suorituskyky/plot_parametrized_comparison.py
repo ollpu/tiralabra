@@ -46,12 +46,18 @@ plt.xlabel("input")
 plt.yscale("log")
 plt.ylabel("time (µs)")
 plt.gca().get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+comp = [[] for x in values]
 for name, data in baseline_data.items():
     data.sort(key=lambda t: t[0])
+    for t, arr in zip(data, comp):
+        arr.append(t[1])
     points = np.array([t[1] for t in data])
     confidence = np.array([[t[2] for t in data], [t[3] for t in data]])
     confidence = np.abs(confidence - points)
     #plt.errorbar(values, points, yerr=confidence, linestyle="solid", marker="o")
     plt.plot(values, points, label=name, marker="o")
+for old, new in comp:
+    change = (old-new)/old * 100
+    print(f"{old:.3f}; {new:.3f}; {change:.1f} %".replace(".", ","))
 plt.legend()
 plt.show()
