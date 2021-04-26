@@ -49,7 +49,7 @@ koilla ja molemmissa testeissä algoritmi nopeutui noin 70 %.
 ![](suorituskykykuvaajat/fft_copy_vertailu.png)
 ![](suorituskykykuvaajat/fft_both_vertailu.png)
 
-Keskimääräiset suoritusajat (ennen (ms); jälkeen (ms); muutos):
+Keskimääräiset suoritusajat (ennen (µs); jälkeen (µs); muutos):
 
 | koko  | copy-and-fft | fft-and-ifft |
 | ----- | ------------ | ------------ |
