@@ -3,23 +3,19 @@ use std::vec::Vec;
 use std::{error::Error, result::Result};
 use tuix::*;
 
+mod test_signal;
+use test_signal::TestSignal;
+
 use tiralabra::ring_buffer;
 
 static THEME: &'static str = include_str!("theme.css");
 fn main() -> Result<(), Box<dyn Error>> {
-    let host = cpal::default_host();
-    let device = host.default_input_device().unwrap();
-    eprintln!("Käytetään äänilaitetta: \"{}\"", device.name()?);
-    let config = device.default_input_config()?;
-    let sample_format = config.sample_format();
-    let config: cpal::StreamConfig = config.into();
-    let (plot, plot_ingest) =
-        Plot::new_and_ingestor(config.sample_rate.0, config.channels as usize);
-    match sample_format {
-        cpal::SampleFormat::F32 => run_audio::<f32>(device, config, plot_ingest)?,
-        cpal::SampleFormat::I16 => run_audio::<i16>(device, config, plot_ingest)?,
-        cpal::SampleFormat::U16 => run_audio::<u16>(device, config, plot_ingest)?,
+    let (publish_handle, consume_handle) = ring_buffer::with_capacity(8 * N);
+    match setup_audio(publish_handle) {
+        Ok(_) => {},
+        Err(e) => eprintln!("Mikrofonin avaaminen ei onnistunut: {:?}\nVoit silti käyttää testisignaalia!", e),
     }
+    let plot = Plot::new(consume_handle);
     let app = Application::new(move |state, window| {
         state.add_theme(style::themes::DEFAULT_THEME);
         state.add_theme(THEME);
@@ -37,6 +33,21 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 fn err_fn(err: cpal::StreamError) {
     eprintln!("Virhe äänilaitteen kanssa: {}", err);
+}
+fn setup_audio(publish_handle: ring_buffer::Producer<f32>) -> Result<(), Box<dyn Error>> {
+    let host = cpal::default_host();
+    let device = host.default_input_device().ok_or("Äänilaitetta ei löydetty")?;
+    eprintln!("Käytetään äänilaitetta: \"{}\"", device.name()?);
+    let config = device.default_input_config()?;
+    let sample_format = config.sample_format();
+    let config: cpal::StreamConfig = config.into();
+    let plot_ingest = PlotIngest::new(config.channels as usize, publish_handle);
+    match sample_format {
+        cpal::SampleFormat::F32 => run_audio::<f32>(device, config, plot_ingest)?,
+        cpal::SampleFormat::I16 => run_audio::<i16>(device, config, plot_ingest)?,
+        cpal::SampleFormat::U16 => run_audio::<u16>(device, config, plot_ingest)?,
+    }
+    Ok(())
 }
 fn run_audio<T: cpal::Sample>(
     device: cpal::Device,
@@ -62,6 +73,13 @@ enum PlotControlEvent {
     ShowMemory(bool),
     DisplayDecayTime(f32),
     MemoryDecayTime(f32),
+    Source(AudioSource),
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+enum AudioSource {
+    Microphone,
+    Test,
 }
 
 /// Hard-coded to read pieces of size 44100/30 for now.
@@ -75,6 +93,13 @@ struct PlotIngest {
 }
 
 impl PlotIngest {
+    fn new(channels: usize, publish_handle: ring_buffer::Producer<f32>) -> PlotIngest {
+        PlotIngest {
+            channels,
+            publish_handle,
+            buffer: Vec::with_capacity(N),
+        }
+    }
     fn process<T: cpal::Sample>(&mut self, data: &[T]) {
         for frame in data.chunks(self.channels) {
             if self.buffer.len() < N {
@@ -98,6 +123,7 @@ impl PlotIngest {
 use tiralabra::correlation_match::CorrelationMatch;
 struct Plot {
     consume_handle: ring_buffer::Consumer<f32>,
+    test_signal_generator: TestSignal,
     correlation_matcher: CorrelationMatch,
     buffer: [f32; N],
     offset: usize,
@@ -108,6 +134,7 @@ struct Plot {
     show_memory: bool,
     display_decay: f32,
     memory_decay: f32,
+    audio_source: AudioSource,
 }
 
 fn decay_time_to_factor(time: f32) -> f32 {
@@ -116,34 +143,28 @@ fn decay_time_to_factor(time: f32) -> f32 {
 }
 
 impl Plot {
-    pub fn new_and_ingestor(_sample_rate: u32, channels: usize) -> (Self, PlotIngest) {
-        let (publish_handle, consume_handle) = ring_buffer::with_capacity(8 * N);
+    pub fn new(consume_handle: ring_buffer::Consumer<f32>) -> Self {
         let mut weight = [0.; M];
         for (i, w) in weight.iter_mut().enumerate() {
             *w = 1.
                 + (2. * std::f32::consts::PI * (i as isize - (M / 2) as isize) as f32 / M as f32)
                     .cos()
         }
-        (
-            Plot {
-                consume_handle,
-                correlation_matcher: CorrelationMatch::new(N),
-                buffer: [0.; N],
-                offset: 0,
-                last_displayed: [0.; M],
-                memory: [0.; M],
-                weight,
-                stabilize_enabled: true,
-                show_memory: false,
-                display_decay: decay_time_to_factor(0.2),
-                memory_decay: decay_time_to_factor(0.8),
-            },
-            PlotIngest {
-                channels,
-                publish_handle,
-                buffer: Vec::with_capacity(N),
-            },
-        )
+        Plot {
+            consume_handle,
+            test_signal_generator: TestSignal::new(),
+            correlation_matcher: CorrelationMatch::new(N),
+            buffer: [0.; N],
+            offset: 0,
+            last_displayed: [0.; M],
+            memory: [0.; M],
+            weight,
+            stabilize_enabled: true,
+            show_memory: false,
+            display_decay: decay_time_to_factor(0.2),
+            memory_decay: decay_time_to_factor(0.8),
+            audio_source: AudioSource::Microphone,
+        }
     }
 }
 
@@ -165,7 +186,21 @@ impl Widget for Plot {
         state.insert_event(Event::new(WindowEvent::Redraw).direct(Entity::root()));
         let BoundingBox { x, y, h, w } = state.data.get_bounds(entity);
 
-        while let Ok(_) = self.consume_handle.pop_full(&mut self.buffer) {
+        let mut test_once = true;
+        while {
+            match self.audio_source {
+                AudioSource::Microphone => self.consume_handle.pop_full(&mut self.buffer).is_ok(),
+                AudioSource::Test => {
+                    if test_once {
+                        self.consume_handle.discard_all();
+                        test_once = false;
+                        self.test_signal_generator.get(&mut self.buffer)
+                    } else {
+                        false
+                    }
+                }
+            }
+        } {
             if self.stabilize_enabled {
                 self.offset =
                     self.correlation_matcher
@@ -177,8 +212,8 @@ impl Widget for Plot {
                 *tr = factor * self.buffer[i + self.offset] + (1. - factor) * *tr;
             }
         }
-        // Smooth one per displayed frame. Memory is smoothed once per piece of input data instead.
-        let factor = self.display_decay;
+        // Smooth once per displayed frame. Memory is smoothed once per piece of input data instead.
+        let factor = if self.stabilize_enabled { self.display_decay } else { 1. };
         for (i, tr) in self.last_displayed.iter_mut().enumerate() {
             *tr = factor * self.buffer[i + self.offset] + (1. - factor) * *tr;
         }
@@ -225,6 +260,9 @@ impl Widget for Plot {
                 PlotControlEvent::MemoryDecayTime(val) => {
                     self.memory_decay = decay_time_to_factor(*val);
                 }
+                PlotControlEvent::Source(source) => {
+                    self.audio_source = *source;
+                }
             }
             event.consume();
         }
@@ -248,6 +286,28 @@ impl Widget for Control {
     fn on_build(&mut self, state: &mut State, entity: Entity) -> Self::Ret {
         entity.set_element(state, "control");
         entity.set_layout_type(state, LayoutType::Column);
+        let (_, _, dropdown) = Dropdown::new("Äänilähde").build(state, entity, |b| {
+            b
+                .set_height(Pixels(30.0))
+                .set_width(Stretch(1.0))
+        });
+        let options = List::new().build(state, dropdown, |b| b);
+        CheckButton::new(true)
+            .on_checked(Event::new(PlotControlEvent::Source(AudioSource::Microphone)).propagate(Propagation::All))
+            .build(state, options, |b| {
+            b
+                .set_text("Mikrofoni")
+                .set_height(Pixels(30.0))
+                .set_child_left(Pixels(5.0))
+        });
+        CheckButton::new(false)
+            .on_checked(Event::new(PlotControlEvent::Source(AudioSource::Test)).propagate(Propagation::All))
+            .build(state, options, |b| {
+            b
+                .set_text("Testisignaali")
+                .set_height(Pixels(30.0))
+                .set_child_left(Pixels(5.0))
+        });
         let checkbox = Row::new().build(state, entity, |builder| builder.class("check"));
         Checkbox::new(true)
             .on_checked(Event::new(PlotControlEvent::Stabilize(true)).propagate(Propagation::All))

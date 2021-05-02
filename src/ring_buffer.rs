@@ -166,6 +166,13 @@ impl<T: Item> Consumer<T> {
             Ok(())
         }
     }
+
+    /// Discard all currently available data.
+    pub fn discard_all(&mut self) {
+        let range = self.internal.consume_available();
+        let amount = range.size_hint().0;
+        self.internal.commit_consumed(amount);
+    }
 }
 
 impl Iterator for RingRange {
