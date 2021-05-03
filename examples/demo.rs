@@ -85,6 +85,7 @@ enum AudioSource {
 /// Hard-coded to read pieces of size 44100/30 for now.
 const N: usize = 2 * 735;
 const M: usize = 2 * 360;
+const SCROLL_AMOUNT: i32 = 100;
 
 struct PlotIngest {
     channels: usize,
@@ -135,6 +136,7 @@ struct Plot {
     display_decay: f32,
     memory_decay: f32,
     audio_source: AudioSource,
+    scroll_amount: i32,
 }
 
 fn decay_time_to_factor(time: f32) -> f32 {
@@ -164,6 +166,7 @@ impl Plot {
             display_decay: decay_time_to_factor(0.2),
             memory_decay: decay_time_to_factor(0.8),
             audio_source: AudioSource::Microphone,
+            scroll_amount: 0,
         }
     }
 }
@@ -185,6 +188,34 @@ impl Widget for Plot {
     fn on_draw(&mut self, state: &mut State, entity: Entity, canvas: &mut Canvas<OpenGl>) {
         state.insert_event(Event::new(WindowEvent::Redraw).direct(Entity::root()));
         let BoundingBox { x, y, h, w } = state.data.get_bounds(entity);
+
+        // Handle scroll
+        let mut scroll = self.scroll_amount / 6;
+        if scroll == 0 && self.scroll_amount != 0 {
+            scroll = self.scroll_amount;
+        }
+        self.scroll_amount -= scroll;
+        if scroll > 0 {
+            let scroll = scroll as usize;
+            self.last_displayed.rotate_right(scroll);
+            self.memory.rotate_right(scroll);
+            self.buffer.rotate_right(scroll);
+            for v in self.buffer[..scroll].iter_mut() { *v = 0.; }
+            self.last_displayed[..scroll].copy_from_slice(&self.buffer[self.offset..][..scroll]);
+            self.memory[..scroll].copy_from_slice(&self.buffer[self.offset..][..scroll]);
+        } else if scroll < 0 {
+            let scroll = -scroll as usize;
+            self.last_displayed.rotate_left(scroll);
+            self.memory.rotate_left(scroll);
+            self.buffer.rotate_left(scroll);
+            for v in self.buffer[N - scroll..].iter_mut() { *v = 0.; }
+            self.last_displayed[M - scroll..].copy_from_slice(
+                &self.buffer[self.offset + M - scroll..][..scroll]
+            );
+            self.memory[M - scroll..].copy_from_slice(
+                &self.buffer[self.offset + M - scroll..][..scroll]
+            );
+        }
 
         let mut test_once = true;
         while {
@@ -265,6 +296,18 @@ impl Widget for Plot {
                 }
             }
             event.consume();
+        }
+        if let Some(window_event) = event.message.downcast() {
+            match window_event {
+                WindowEvent::MouseScroll(_, change) => {
+                    if *change > 0. {
+                        self.scroll_amount += SCROLL_AMOUNT;
+                    } else {
+                        self.scroll_amount -= SCROLL_AMOUNT;
+                    }
+                }
+                _ => {}
+            }
         }
     }
 }
