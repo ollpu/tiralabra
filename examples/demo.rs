@@ -243,6 +243,11 @@ impl Widget for Plot {
                 *tr = factor * self.buffer[i + self.offset] + (1. - factor) * *tr;
             }
         }
+        // Draw indicator self.offset indicator
+        canvas.clear_rect((x + 0.4 * w) as u32, (y + h - 40.) as u32, (0.2 * w) as u32, 15, Color::rgb(70, 70, 70));
+        let pos = self.offset as f32 / N as f32;
+        let span = M as f32 / N as f32;
+        canvas.clear_rect((x + (0.4 + 0.2 * pos) * w) as u32, (y + h - 40.) as u32, (0.2 * span * w) as u32, 15, Color::rgb(90, 90, 90));
         // Smooth once per displayed frame. Memory is smoothed once per piece of input data instead.
         let factor = if self.stabilize_enabled { self.display_decay } else { 1. };
         for (i, tr) in self.last_displayed.iter_mut().enumerate() {

@@ -18,7 +18,7 @@ impl TestSignal {
         if self.counter == 0 {
             for sample in buffer.iter_mut() {
                 let modulator = osc(&mut self.modulator_phase, 0.5);
-                *sample = 0.8 * osc(&mut self.oscillator_phase, 300. * (1. + 0.2 * modulator));
+                *sample = 0.8 * osc(&mut self.oscillator_phase, 201. * (1. + 0.109 * modulator));
             }
             self.counter = 1;
             true
