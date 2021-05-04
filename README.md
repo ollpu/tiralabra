@@ -17,10 +17,7 @@ Aja sitten demo suorittamalla (grafiikkakirjastojen kääntämisessä kestää j
 cargo run --release --example demo
 ```
 
-"Vakauta"-valintaruudulla itse algoritmin saa päälle tai pois. Vaimenemisajan liu'ut
-vaikuttavat siihen, kuinka nopeasti näytettävä signaali vaihtuu. Muistille on oma liukunsa,
-jotta algoritmi saadaan muistamaan suurpiirteisen aaltomuodon pidempään.
-
+#### [Demon käyttöohjeet](dokumentaatio/käyttöohje.md)
 
 Testit voidaan ajaa suorittamalla
 
