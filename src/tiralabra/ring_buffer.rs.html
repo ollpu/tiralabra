@@ -196,6 +196,13 @@
 <span id="193">193</span>
 <span id="194">194</span>
 <span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Ring buffer for transferring audio data between threads in a wait-free manner.</span>
 <span class="doccomment">//!</span>
@@ -364,6 +371,13 @@
             <span class="self">self</span>.<span class="ident">internal</span>.<span class="ident">commit_consumed</span>(<span class="ident">amount</span>);
             <span class="prelude-val">Ok</span>(())
         }
+    }
+
+    <span class="doccomment">/// Discard all currently available data.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">discard_all</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">internal</span>.<span class="ident">consume_available</span>();
+        <span class="kw">let</span> <span class="ident">amount</span> <span class="op">=</span> <span class="ident">range</span>.<span class="ident">size_hint</span>().<span class="number">0</span>;
+        <span class="self">self</span>.<span class="ident">internal</span>.<span class="ident">commit_consumed</span>(<span class="ident">amount</span>);
     }
 }
 
