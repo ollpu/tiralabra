@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[a4paper,vmargin=30mm,hmargin=30mm,footskip=15mm]{geometry}
 \usepackage[finnish]{babel}
+\usepackage[T1]{fontenc}
 
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -36,7 +37,8 @@ Demo-ohjelmassa esitetään, kuinka tätä voidaan käyttää oskilloskoopin kuv
 \end{figure}
 
 Algoritmi, joka etsii pidemmästä äänenpätkästä $A$ sen kohdan, jossa
-lyhyempi äänenpätkä $B$ esiintyy kaikista lähimpänä.
+lyhyempi äänenpätkä $B$ esiintyy kaikista lähimpänä. Toteutus löytyy tiedostosta
+\texttt{src/correlation\_match.rs}.
 
 Olkoon signaalit $A[0..n]$ ja $B[0..m]$, $n \ge m$.
 Algoritmi etsii sellaisen aikasiirroksen $t$, jolla summa
@@ -84,7 +86,7 @@ siten, että siihen mahtuu vähintään kaksi jaksoa. Tällöin uudesta signaali
 joka vastaa aiemmin näytettyä signaalia täsmällisesti. Taulukon $B$ koko taas on oltava
 korkeintaan puolet tästä.
 
-Painofunktiona $w$ käytetään jotakin "kellokäyrän" tyyppistä funktiota, eli painotetaan
+Painofunktiona $w$ käytetään jotakin ``kellokäyrän'' tyyppistä funktiota, eli painotetaan
 näytön keskikohtia. Näin signaali pysyy keskitettynä, vaikka perustaajuus muuttuu. Demo
 käyttää Hann-ikkunafunktiota \cite{hann}.
 
@@ -103,8 +105,14 @@ on väliaikaisia äkillisiä muutoksia.
 
 \section*{FFT}
 
-FFT eli nopea Fourier-muunnos on toteutettu 2-kantaisena Cooley-Tukey -menetelmänä. Toteutuksesta uupuu vielä
-optimoinnit, kuten twiddle-kertoimien esilasku.
+FFT eli nopea Fourier-muunnos on toteutettu 2-kantaisena Cooley-Tukey -menetelmänä.
+Toteutus on tiedostossa \texttt{src/fft.rs}.
+
+\texttt{fft::Prepared}-olioon esilasketaan tietylle muunnoksen koolle $N$
+twiddle-kertoimet, eli kaikki kompleksiluvut muotoa $e^{2\pi i x / N}$, joita algoritmin
+suorituksen aikana käytetään. Esilaskeminen on projektin käyttötarkoituksessa
+hyödyllistä, koska on tarpeen tehdä jatkuvasti samankokoisia muunnoksia.
+Testausdokumentista arvioidaan tämän optimoinnin hyötyä.
 
 
 \begin{thebibliography}{1}
