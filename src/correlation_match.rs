@@ -129,9 +129,7 @@ impl CorrelationMatch {
             min_value = self.result_buffer[end];
         }
         for (index, [a, b, c]) in IterWindows::from(self.result_buffer.iter().copied()).enumerate() {
-            // Ensure that b <= a, c. Otherwise the minimum is elswehere.
-            if b <= a && b <= c {
-                let (x, y) = parabolic_interpolation::get_minimum_point(a, b, c);
+            if let Some((x, y)) = parabolic_interpolation::get_minimum_point(a, b, c) {
                 if y < min_value {
                     min_position = index as Num + x;
                     min_value = y;
