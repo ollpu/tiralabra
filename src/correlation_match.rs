@@ -26,8 +26,11 @@
 //! nähdään, että se voidaan laskea kahtena ristikorrelaationa (summat x:n yli muotoa
 //! `f(x+t) * g(x)`) ja yhtenä suorana tulona (summa x:n yli muotoa `f(x) * g(x)`).
 
+pub mod parabolic_interpolation;
+
 use crate::cross_correlation::CrossCorrelation;
 use crate::math::*;
+use crate::util::IterWindows;
 
 /// A structure prepared to perform correlation matches up to a given size.
 pub struct CorrelationMatch {
@@ -118,15 +121,23 @@ impl CorrelationMatch {
     }
 
     fn find_minimum(&self) -> Num {
-        // For now, find the minimum index and don't try to interpolate.
-        let mut min_index = 0;
-        let mut min_value = Num::INFINITY;
-        for (index, &value) in self.result_buffer.iter().enumerate() {
-            if value < min_value {
-                min_index = index;
-                min_value = value;
+        let mut min_position = 0.;
+        let mut min_value = self.result_buffer[0];
+        let end = self.result_buffer.len() - 1;
+        if self.result_buffer[end] < min_value {
+            min_position = end as Num;
+            min_value = self.result_buffer[end];
+        }
+        for (index, [a, b, c]) in IterWindows::from(self.result_buffer.iter().copied()).enumerate() {
+            // Ensure that b <= a, c. Otherwise the minimum is elswehere.
+            if b <= a && b <= c {
+                let (x, y) = parabolic_interpolation::get_minimum_point(a, b, c);
+                if y < min_value {
+                    min_position = index as Num + x;
+                    min_value = y;
+                }
             }
         }
-        min_index as Num
+        min_position
     }
 }

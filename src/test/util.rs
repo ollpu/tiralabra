@@ -10,7 +10,6 @@ pub fn float_eq(a: Num, b: Num, precision: u32) -> bool {
     let b = b as f64;
     let relative_error = (a - b).abs() / b.abs().max(1.);
     let log_error = relative_error.log10();
-    println!("{}", log_error);
     log_error < -(precision as f64)
 }
 
