@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["EPS",""]],"fn":[["get_minimum_point","Interpolate a function given three points, `(0, a), (1, b), (2, c)`, and find the approximate minimum point. Returns a pair `(x, y)`, describing the minimum point. May also return None, if there is no minimum point or it is not on the interval [0, 2]."]]});
