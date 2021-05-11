@@ -39,6 +39,7 @@ pub struct CorrelationMatch {
     f_buffer: Vec<Num>,
     g_buffer: Vec<Num>,
     result_buffer: Vec<Num>,
+    minima: Vec<(Num, Num)>,
 }
 
 impl CorrelationMatch {
@@ -51,13 +52,17 @@ impl CorrelationMatch {
             f_buffer: vec![0.; max_size],
             g_buffer: vec![0.; max_size],
             result_buffer: vec![0.; max_size],
+            minima: vec![(0., 0.); max_size],
         }
     }
 
     /// Compute how much `b` should be shifted (to the right) to most closely match with `a`. The
-    /// array `w` is used for weighting, and it should be as long as `b`. All arrays must be less
-    /// than the maximum size given on `new`.
-    pub fn compute(&mut self, a: &[Num], b: &[Num], w: &[Num]) -> Num {
+    /// array `w` is used for weighting, and it should be as long as `b`. If it can be estimated,
+    /// an interval is also returned as the second item in the tuple. This can be used to compute
+    /// the fundamental frequency of the signal.
+    ///
+    /// All arrays must be less than the maximum size given on `new`.
+    pub fn compute(&mut self, a: &[Num], b: &[Num], w: &[Num]) -> (Num, Option<Num>) {
         assert!(a.len() <= self.max_size);
         assert!(b.len() <= a.len());
         assert!(w.len() == b.len());
@@ -65,7 +70,7 @@ impl CorrelationMatch {
         self.compute_a_squared_term(a, w);
         self.compute_cross_term(a, b, w);
         self.compute_b_squared_term(b, w);
-        self.find_minimum()
+        self.find_minimum_and_interval()
     }
 
     fn zero_buffers(&mut self, a_len: usize, b_len: usize) {
@@ -73,6 +78,7 @@ impl CorrelationMatch {
         self.g_buffer.resize(b_len, 0.);
         self.result_buffer.clear();
         self.result_buffer.resize(a_len - b_len + 1, 0.);
+        self.minima.clear();
     }
 
     fn compute_a_squared_term(&mut self, a: &[Num], w: &[Num]) {
@@ -112,15 +118,18 @@ impl CorrelationMatch {
     }
 
     fn compute_b_squared_term(&mut self, b: &[Num], w: &[Num]) {
-        // Compute term w[x] * b[x]^2. This is constant in t, so it shouldn't affect
-        // the rest of the algorithm (but it may in the future).
+        // Compute term w[x] * b[x]^2. This is constant in t.
         let term: Num = w.iter().zip(b.iter()).map(|(&w, &b)| w * b.powi(2)).sum();
         for result in self.result_buffer.iter_mut() {
             *result += term;
         }
     }
 
-    fn find_minimum(&self) -> Num {
+    fn find_minimum_and_interval(&mut self) -> (Num, Option<Num>) {
+        let mut max_value = 1.;
+        for value in &self.result_buffer {
+            max_value = value.max(max_value);
+        }
         let mut min_position = 0.;
         let mut min_value = self.result_buffer[0];
         let end = self.result_buffer.len() - 1;
@@ -130,12 +139,28 @@ impl CorrelationMatch {
         }
         for (index, [a, b, c]) in IterWindows::from(self.result_buffer.iter().copied()).enumerate() {
             if let Some((x, y)) = parabolic_interpolation::get_minimum_point(a, b, c) {
+                let position = index as Num + x;
+                self.minima.push((position, y));
                 if y < min_value {
-                    min_position = index as Num + x;
+                    min_position = position;
                     min_value = y;
                 }
             }
         }
-        min_position
+        let threshold = min_value + (max_value - min_value) * 0.1;
+        self.minima.retain(|(_x, y)| *y < threshold);
+        let mut valid_intervals = 0;
+        for [(a_position, _), (b_position, _)] in IterWindows::from(self.minima.iter().copied()) {
+            if b_position - a_position > 1.5 {
+                valid_intervals += 1;
+            }
+        }
+        let interval = if valid_intervals >= 2 {
+            let total = self.minima.last().unwrap().0 - self.minima.first().unwrap().0;
+            Some(total / valid_intervals as Num)
+        } else {
+            None
+        };
+        (min_position, interval)
     }
 }

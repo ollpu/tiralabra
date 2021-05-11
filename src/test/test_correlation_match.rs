@@ -14,7 +14,7 @@ fn simple_correlation_match() {
     let a = [1., 1.4, 1., 1., 1.9, 0., 1., -1.];
     let b = [1., 2.];
     let w = [1., 1.];
-    let offset = matcher.compute(&a, &b, &w);
+    let (offset, _) = matcher.compute(&a, &b, &w);
     let correct = 3.;
     assert!((offset - correct).abs() < 0.5);
 }
@@ -31,7 +31,7 @@ fn random_correlation_match() {
     let mut matcher = CorrelationMatch::new(N);
     let pos = rng.gen_range(1..N - M);
     let w = vec![1.; M];
-    let offset = matcher.compute(&a, &a[pos..][..M], &w);
+    let (offset, _) = matcher.compute(&a, &a[pos..][..M], &w);
     assert!((offset - pos as f32).abs() < 0.5);
 }
 
@@ -46,6 +46,6 @@ fn correlation_match_subsample_accuracy() {
         .map(|i| ((i / N as f32) * 2. * PI).sin())
         .collect();
     let w = [1.; N/2];
-    let offset = matcher.compute(&a, &b, &w);
+    let (offset, _) = matcher.compute(&a, &b, &w);
     assert!(float_eq(offset, pos, 2));
 }
