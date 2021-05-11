@@ -137,6 +137,8 @@ struct Plot {
     memory_decay: f32,
     audio_source: AudioSource,
     scroll_amount: i32,
+    residual: f32,
+    average_frequency: f32,
 }
 
 fn decay_time_to_factor(time: f32) -> f32 {
@@ -167,6 +169,8 @@ impl Plot {
             memory_decay: decay_time_to_factor(0.8),
             audio_source: AudioSource::Microphone,
             scroll_amount: 0,
+            residual: 0.,
+            average_frequency: 0.,
         }
     }
 }
@@ -192,9 +196,11 @@ impl Widget for Plot {
         // Handle scroll
         let mut scroll = self.scroll_amount / 6;
         if scroll == 0 && self.scroll_amount != 0 {
-            scroll = self.scroll_amount;
+            scroll = self.scroll_amount.signum();
         }
         self.scroll_amount -= scroll;
+        scroll -= self.residual as i32;
+        self.residual = self.residual.fract();
         if scroll > 0 {
             let scroll = scroll as usize;
             self.last_displayed.rotate_right(scroll);
@@ -233,21 +239,35 @@ impl Widget for Plot {
             }
         } {
             if self.stabilize_enabled {
-                self.offset =
+                let (offset, interval) =
                     self.correlation_matcher
-                        .compute(&self.buffer, &self.memory, &self.weight)
-                        as usize;
+                        .compute(&self.buffer, &self.memory, &self.weight);
+                let rounded = offset.round();
+                self.offset = rounded as usize;
+                self.residual += offset - rounded;
+                if let Some(interval) = interval {
+                    let measured_frequency = 44100. / interval;
+                    let factor = self.display_decay;
+                    self.average_frequency = factor * measured_frequency + (1. - factor) * self.average_frequency;
+                }
             }
             let factor = self.memory_decay;
             for (i, tr) in self.memory.iter_mut().enumerate() {
                 *tr = factor * self.buffer[i + self.offset] + (1. - factor) * *tr;
             }
         }
-        // Draw indicator self.offset indicator
+
+        // Draw offset indicator
         canvas.clear_rect((x + 0.4 * w) as u32, (y + h - 40.) as u32, (0.2 * w) as u32, 15, Color::rgb(70, 70, 70));
         let pos = self.offset as f32 / N as f32;
         let span = M as f32 / N as f32;
         canvas.clear_rect((x + (0.4 + 0.2 * pos) * w) as u32, (y + h - 40.) as u32, (0.2 * span * w) as u32, 15, Color::rgb(90, 90, 90));
+        // Draw frequency
+        let mut paint = femtovg::Paint::default();
+        paint.set_font(&[state.fonts.regular.unwrap()]);
+        paint.set_font_size(24.);
+        paint.set_color(Color::white());
+        canvas.fill_text(x + 20., y + h - 21., format!("{:.2} Hz", self.average_frequency), paint).unwrap();
         // Smooth once per displayed frame. Memory is smoothed once per piece of input data instead.
         let factor = if self.stabilize_enabled { self.display_decay } else { 1. };
         for (i, tr) in self.last_displayed.iter_mut().enumerate() {
@@ -272,7 +292,7 @@ impl Widget for Plot {
             .last_displayed
             .iter()
             .enumerate()
-            .map(|(i, v)| (x + w / M as f32 * i as f32, y + h / 2. - v * h / 2.));
+            .map(|(i, v)| (x + w / M as f32 * (i as f32 - self.residual), y + h / 2. - v * h / 2.));
         let (x, y) = points.next().unwrap();
         path.move_to(x, y);
         for (x, y) in points {
