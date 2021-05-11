@@ -37,15 +37,28 @@ fn random_correlation_match() {
 
 #[test]
 fn correlation_match_subsample_accuracy() {
-    let mut matcher = CorrelationMatch::new(32);
     const N: usize = 32;
+    let mut matcher = CorrelationMatch::new(N);
     let pos = 5.315237;
     let a: Vec<_> = (0..N).map(|i| ((i as f32 / N as f32) * 2. * PI).sin()).collect();
     let b: Vec<_> = (0..N/2)
         .map(|i| i as f32 + pos)
         .map(|i| ((i / N as f32) * 2. * PI).sin())
         .collect();
-    let w = [1.; N/2];
+    let w = vec![1.; N/2];
     let (offset, _) = matcher.compute(&a, &b, &w);
     assert!(float_eq(offset, pos, 2));
+}
+
+#[test]
+fn correlation_match_interval() {
+    const N: usize = 32;
+    const M: usize = 16;
+    let mut matcher = CorrelationMatch::new(N);
+    let interval = 6.137241;
+    let a: Vec<_> = (0..N).map(|i| ((i as f32 / interval) * 2. * PI).sin()).collect();
+    let pos = 13;
+    let w = vec![1.; M];
+    let (_, measured_interval) = matcher.compute(&a, &a[pos..][..M], &w);
+    assert!(float_eq(measured_interval.unwrap(), interval, 2));
 }
