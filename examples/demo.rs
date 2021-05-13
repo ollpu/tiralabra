@@ -121,24 +121,17 @@ impl PlotIngest {
     }
 }
 
-use tiralabra::correlation_match::CorrelationMatch;
+use tiralabra::display::DisplayBuffer;
 struct Plot {
     consume_handle: ring_buffer::Consumer<f32>,
     test_signal_generator: TestSignal,
-    correlation_matcher: CorrelationMatch,
-    buffer: [f32; N],
-    offset: usize,
-    last_displayed: [f32; M],
-    memory: [f32; M],
-    weight: [f32; M],
+    display: DisplayBuffer,
     stabilize_enabled: bool,
     show_memory: bool,
     display_decay: f32,
     memory_decay: f32,
     audio_source: AudioSource,
     scroll_amount: i32,
-    residual: f32,
-    average_frequency: f32,
 }
 
 fn decay_time_to_factor(time: f32) -> f32 {
@@ -148,29 +141,16 @@ fn decay_time_to_factor(time: f32) -> f32 {
 
 impl Plot {
     pub fn new(consume_handle: ring_buffer::Consumer<f32>) -> Self {
-        let mut weight = [0.; M];
-        for (i, w) in weight.iter_mut().enumerate() {
-            *w = 1.
-                + (2. * std::f32::consts::PI * (i as isize - (M / 2) as isize) as f32 / M as f32)
-                    .cos()
-        }
         Plot {
             consume_handle,
             test_signal_generator: TestSignal::new(),
-            correlation_matcher: CorrelationMatch::new(N),
-            buffer: [0.; N],
-            offset: 0,
-            last_displayed: [0.; M],
-            memory: [0.; M],
-            weight,
+            display: DisplayBuffer::new(N, M),
             stabilize_enabled: true,
             show_memory: false,
             display_decay: decay_time_to_factor(0.2),
             memory_decay: decay_time_to_factor(0.8),
             audio_source: AudioSource::Microphone,
             scroll_amount: 0,
-            residual: 0.,
-            average_frequency: 0.,
         }
     }
 }
@@ -199,67 +179,29 @@ impl Widget for Plot {
             scroll = self.scroll_amount.signum();
         }
         self.scroll_amount -= scroll;
-        scroll -= self.residual as i32;
-        self.residual = self.residual.fract();
-        if scroll > 0 {
-            let scroll = scroll as usize;
-            self.last_displayed.rotate_right(scroll);
-            self.memory.rotate_right(scroll);
-            self.buffer.rotate_right(scroll);
-            for v in self.buffer[..scroll].iter_mut() { *v = 0.; }
-            self.last_displayed[..scroll].copy_from_slice(&self.buffer[self.offset..][..scroll]);
-            self.memory[..scroll].copy_from_slice(&self.buffer[self.offset..][..scroll]);
-        } else if scroll < 0 {
-            let scroll = -scroll as usize;
-            self.last_displayed.rotate_left(scroll);
-            self.memory.rotate_left(scroll);
-            self.buffer.rotate_left(scroll);
-            for v in self.buffer[N - scroll..].iter_mut() { *v = 0.; }
-            self.last_displayed[M - scroll..].copy_from_slice(
-                &self.buffer[self.offset + M - scroll..][..scroll]
-            );
-            self.memory[M - scroll..].copy_from_slice(
-                &self.buffer[self.offset + M - scroll..][..scroll]
-            );
-        }
+        self.display.scroll(scroll);
 
-        let mut test_once = true;
-        while {
-            match self.audio_source {
-                AudioSource::Microphone => self.consume_handle.pop_full(&mut self.buffer).is_ok(),
-                AudioSource::Test => {
-                    if test_once {
-                        self.consume_handle.discard_all();
-                        test_once = false;
-                        self.test_signal_generator.get(&mut self.buffer)
-                    } else {
-                        false
-                    }
+        match self.audio_source {
+            AudioSource::Microphone => {
+                while self.consume_handle.pop_full(self.display.get_buffer_mut()).is_ok() {
+                    self.display.update_match(self.stabilize_enabled, self.memory_decay, self.display_decay);
                 }
             }
-        } {
-            if self.stabilize_enabled {
-                let (offset, interval) =
-                    self.correlation_matcher
-                        .compute(&self.buffer, &self.memory, &self.weight);
-                let rounded = offset.round();
-                self.offset = rounded as usize;
-                self.residual += offset - rounded;
-                if let Some(interval) = interval {
-                    let measured_frequency = 44100. / interval;
-                    let factor = self.display_decay;
-                    self.average_frequency = factor * measured_frequency + (1. - factor) * self.average_frequency;
+            AudioSource::Test => {
+                self.consume_handle.discard_all();
+                if self.test_signal_generator.get(self.display.get_buffer_mut()) {
+                    self.display.update_match(self.stabilize_enabled, self.memory_decay, self.display_decay);
                 }
-            }
-            let factor = self.memory_decay;
-            for (i, tr) in self.memory.iter_mut().enumerate() {
-                *tr = factor * self.buffer[i + self.offset] + (1. - factor) * *tr;
             }
         }
+        self.display.update_display(self.display_decay);
+        let (offset, residual) = self.display.get_offset();
+        let interval = self.display.get_interval();
+        let frequency = 44100. / interval;
 
         // Draw offset indicator
         canvas.clear_rect((x + 0.4 * w) as u32, (y + h - 40.) as u32, (0.2 * w) as u32, 15, Color::rgb(70, 70, 70));
-        let pos = self.offset as f32 / N as f32;
+        let pos = offset as f32 / N as f32;
         let span = M as f32 / N as f32;
         canvas.clear_rect((x + (0.4 + 0.2 * pos) * w) as u32, (y + h - 40.) as u32, (0.2 * span * w) as u32, 15, Color::rgb(90, 90, 90));
         // Draw frequency
@@ -267,16 +209,12 @@ impl Widget for Plot {
         paint.set_font(&[state.fonts.regular.unwrap()]);
         paint.set_font_size(24.);
         paint.set_color(Color::white());
-        canvas.fill_text(x + 20., y + h - 21., format!("{:.2} Hz", self.average_frequency), paint).unwrap();
-        // Smooth once per displayed frame. Memory is smoothed once per piece of input data instead.
-        let factor = if self.stabilize_enabled { self.display_decay } else { 1. };
-        for (i, tr) in self.last_displayed.iter_mut().enumerate() {
-            *tr = factor * self.buffer[i + self.offset] + (1. - factor) * *tr;
-        }
+        canvas.fill_text(x + 20., y + h - 21., format!("{:.2} Hz", frequency), paint).unwrap();
         if self.show_memory {
             let mut path = Path::new();
             let mut points = self
-                .memory
+                .display
+                .get_memory()
                 .iter()
                 .enumerate()
                 .map(|(i, v)| (x + w / M as f32 * i as f32, y + h / 2. - v * h / 2.));
@@ -289,10 +227,11 @@ impl Widget for Plot {
         }
         let mut path = Path::new();
         let mut points = self
-            .last_displayed
+            .display
+            .get_display()
             .iter()
             .enumerate()
-            .map(|(i, v)| (x + w / M as f32 * (i as f32 - self.residual), y + h / 2. - v * h / 2.));
+            .map(|(i, v)| (x + w / M as f32 * (i as f32 - residual), y + h / 2. - v * h / 2.));
         let (x, y) = points.next().unwrap();
         path.move_to(x, y);
         for (x, y) in points {
