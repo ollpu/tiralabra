@@ -1,4 +1,4 @@
-use crate::util::{shift_left, IterWindows};
+use crate::util::{shift_left, shift_right, shift_left_fill, shift_right_fill, IterWindows};
 
 #[test]
 fn shift_left_example() {
@@ -14,6 +14,28 @@ fn shift_left_one() {
     let replace = [-1];
     shift_left(&mut array, &replace);
     assert_eq!(array, [2, 3, 4, 5, -1]);
+}
+
+#[test]
+fn shift_right_example() {
+    let mut array = ['a', 'b', 'c', 'd'];
+    let replace = ['X', 'Y'];
+    shift_right(&mut array, &replace);
+    assert_eq!(array, ['X', 'Y', 'a', 'b']);
+}
+
+#[test]
+fn shift_left_fill_example() {
+    let mut array = ['a', 'b', 'c', 'd'];
+    shift_left_fill(&mut array, 2, '-');
+    assert_eq!(array, ['c', 'd', '-', '-']);
+}
+
+#[test]
+fn shift_right_fill_example() {
+    let mut array = ['a', 'b', 'c', 'd'];
+    shift_right_fill(&mut array, 2, '-');
+    assert_eq!(array, ['-', '-', 'a', 'b']);
 }
 
 #[test]
