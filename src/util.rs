@@ -41,7 +41,7 @@ impl<T: Copy + Default, I: Iterator<Item=T>, const N: usize> Iterator for IterWi
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(item) = self.source.next() {
             shift_left(&mut self.array, &[item]);
-            Some(self.array.clone())
+            Some(self.array)
         } else {
             None
         }

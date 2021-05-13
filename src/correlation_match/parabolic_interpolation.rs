@@ -12,11 +12,12 @@ const EPS: Num = 1e-8;
 /// May also return None, if there is no minimum point or it is not on the interval [0, 2].
 #[inline]
 pub fn get_minimum_point(a: Num, b: Num, c: Num) -> Option<(Num, Num)> {
-    let w = 2. * (a - 2. * b + c);
-    if w > EPS {
+    // x^2 coefficient should be positive: parabola opens upwards
+    let x2coefficient = 2. * (a - 2. * b + c);
+    if x2coefficient > EPS {
         let v = 3. * a - 4. * b + c;
-        let position = v / w;
-        if position >= 0. && position <= 2. {
+        let position = v / x2coefficient;
+        if (0. ..=2.).contains(&position) {
             let value = a - v * position / 4.;
             Some((position, value))
         } else {
