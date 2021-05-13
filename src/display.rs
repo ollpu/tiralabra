@@ -1,3 +1,5 @@
+//! Wrapper for [`correlation_match`], providing functionality for displaying a waveform.
+
 use crate::math::*;
 use crate::util::{shift_right, shift_left, shift_right_fill, shift_left_fill};
 use crate::correlation_match::CorrelationMatch;
@@ -17,8 +19,8 @@ pub struct DisplayBuffer {
 impl DisplayBuffer {
     pub fn new(input_size: usize, display_size: usize) -> Self {
         let weight: Vec<_> = (0..display_size)
-            .map(|index| index as isize - (input_size / 2) as isize)
-            .map(|offset| offset as f32 / input_size as f32)
+            .map(|index| index as isize - (display_size / 2) as isize)
+            .map(|offset| offset as f32 / display_size as f32)
             .map(|x| 1. + (2. * PI * x).cos())
             .collect();
         DisplayBuffer {
