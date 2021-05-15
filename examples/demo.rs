@@ -83,7 +83,8 @@ enum PlotControlEvent {
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum AudioSource {
     Microphone,
-    Test,
+    TestSine,
+    TestModulating,
 }
 
 /// Hard-coded to read pieces of size 44100/30 for now.
@@ -193,9 +194,15 @@ impl Widget for Plot {
                     self.display.update_match(self.stabilize_enabled, self.memory_decay, self.display_decay);
                 }
             }
-            AudioSource::Test => {
+            AudioSource::TestSine => {
                 self.consume_handle.discard_all();
-                if self.test_signal_generator.get(self.display.get_buffer_mut()) {
+                if self.test_signal_generator.get(self.display.get_buffer_mut(), false) {
+                    self.display.update_match(self.stabilize_enabled, self.memory_decay, self.display_decay);
+                }
+            }
+            AudioSource::TestModulating => {
+                self.consume_handle.discard_all();
+                if self.test_signal_generator.get(self.display.get_buffer_mut(), true) {
                     self.display.update_match(self.stabilize_enabled, self.memory_decay, self.display_decay);
                 }
             }
@@ -316,10 +323,18 @@ impl Widget for Control {
                 .set_child_left(Pixels(5.0))
         });
         CheckButton::new(false)
-            .on_checked(Event::new(PlotControlEvent::Source(AudioSource::Test)).propagate(Propagation::All))
+            .on_checked(Event::new(PlotControlEvent::Source(AudioSource::TestSine)).propagate(Propagation::All))
             .build(state, options, |b| {
             b
-                .set_text("Testisignaali")
+                .set_text("Testi: Siniaalto")
+                .set_height(Pixels(30.0))
+                .set_child_left(Pixels(5.0))
+        });
+        CheckButton::new(false)
+            .on_checked(Event::new(PlotControlEvent::Source(AudioSource::TestModulating)).propagate(Propagation::All))
+            .build(state, options, |b| {
+            b
+                .set_text("Testi: Vaihtuva")
                 .set_height(Pixels(30.0))
                 .set_child_left(Pixels(5.0))
         });
