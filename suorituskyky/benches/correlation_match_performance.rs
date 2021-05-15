@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use tiralabra::correlation_match::CorrelationMatch;
+use tiralabra::CorrelationMatch;
 
 use rand::prelude::*;
 use rand::rngs::SmallRng;

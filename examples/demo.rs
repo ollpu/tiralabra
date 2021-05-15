@@ -125,7 +125,7 @@ impl PlotIngest {
     }
 }
 
-use tiralabra::display::DisplayBuffer;
+use tiralabra::DisplayBuffer;
 struct Plot {
     consume_handle: ring_buffer::Consumer<f32>,
     sample_rate: f32,

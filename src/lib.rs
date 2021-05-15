@@ -1,9 +1,14 @@
 #![warn(clippy::cognitive_complexity)]
 
-pub mod display;
-pub mod correlation_match;
-pub mod cross_correlation;
-pub mod fft;
+mod display;
+pub use display::DisplayBuffer;
+mod correlation_match;
+pub use correlation_match::CorrelationMatch;
+pub use correlation_match::parabolic_interpolation::parabolic_interpolation_minimum;
+mod cross_correlation;
+pub use cross_correlation::CrossCorrelation;
+mod fft;
+pub use fft::Fft;
 pub mod math;
 pub mod ring_buffer;
 pub mod util;

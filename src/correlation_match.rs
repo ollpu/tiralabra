@@ -1,30 +1,3 @@
-//! Finds the closest match of a shorter piece of audio from a larger piece of audio.
-//!
-//! Design sketch in Finnish:
-//!
-//! Algoritmi, joka etsii pidemmästä äänenpätkästä A sen kohdan, jossa
-//! lyhyempi äänenpätkä B esiintyy kaikista lähimpänä.
-//!
-//! Käyttötarkoituksena on oskilloskoopin näkymän vakautus. Silloin algoritmille
-//! annettaisiin pätkä A uutta signaalia, ja pätkä B, joka vastaa viimeksi näytettyä
-//! kuvaajaa. Algoritmi etsii uudesta signaalista sellaisen kohdan, jonka näyttämällä
-//! kuvaaja muuttuu mahdollisimman vähän. Vakautettua kuvaajaa on toivottavasti helpompi
-//! seurata, koska se ei liiku jatkuvasti taajuudesta riippuvalla tavalla.
-//!
-//! Olkoon signaalit `A[0..n]` ja `B[0..m]`, `n >= 2m`.
-//! Algoritmi etsii sellaisen aikasiirroksen t, jolla summa x:n yli
-//!
-//! `w(x) * (A[x+t] - B[x])^2`
-//!
-//! on minimaalinen. Tässä `w(x)` on painofunktio, jonka avulla voidaan esimerkiksi
-//! painottaa oskilloskoopin näkymän keskikohtia enemmän kuin reunoja.
-//!
-//! Jos tämä summa esitetään muodossa
-//!
-//! `w(x) * A[x+t]^2 - 2(w(x) * B[x]) * A[x+t] + w(x) * B[x]^2`,
-//!
-//! nähdään, että se voidaan laskea kahtena ristikorrelaationa (summat x:n yli muotoa
-//! `f(x+t) * g(x)`) ja yhtenä suorana tulona (summa x:n yli muotoa `f(x) * g(x)`).
 
 pub mod parabolic_interpolation;
 
@@ -32,7 +5,35 @@ use crate::cross_correlation::CrossCorrelation;
 use crate::math::*;
 use crate::util::IterWindows;
 
-/// A structure prepared to perform correlation matches up to a given size.
+/// Finds the closest match of a shorter piece of audio from a larger piece of audio.
+///
+/// This structure is prepared to perform correlation matches up to a given size.
+///
+/// Design sketch in Finnish:
+///
+/// Algoritmi, joka etsii pidemmästä äänenpätkästä A sen kohdan, jossa
+/// lyhyempi äänenpätkä B esiintyy kaikista lähimpänä.
+///
+/// Käyttötarkoituksena on oskilloskoopin näkymän vakautus. Silloin algoritmille
+/// annettaisiin pätkä A uutta signaalia, ja pätkä B, joka vastaa viimeksi näytettyä
+/// kuvaajaa. Algoritmi etsii uudesta signaalista sellaisen kohdan, jonka näyttämällä
+/// kuvaaja muuttuu mahdollisimman vähän. Vakautettua kuvaajaa on toivottavasti helpompi
+/// seurata, koska se ei liiku jatkuvasti taajuudesta riippuvalla tavalla.
+///
+/// Olkoon signaalit `A[0..n]` ja `B[0..m]`, `n >= 2m`.
+/// Algoritmi etsii sellaisen aikasiirroksen t, jolla summa x:n yli
+///
+/// `w(x) * (A[x+t] - B[x])^2`
+///
+/// on minimaalinen. Tässä `w(x)` on painofunktio, jonka avulla voidaan esimerkiksi
+/// painottaa oskilloskoopin näkymän keskikohtia enemmän kuin reunoja.
+///
+/// Jos tämä summa esitetään muodossa
+///
+/// `w(x) * A[x+t]^2 - 2(w(x) * B[x]) * A[x+t] + w(x) * B[x]^2`,
+///
+/// nähdään, että se voidaan laskea kahtena ristikorrelaationa (summat x:n yli muotoa
+/// `f(x+t) * g(x)`) ja yhtenä suorana tulona (summa x:n yli muotoa `f(x) * g(x)`).
 pub struct CorrelationMatch {
     max_size: usize,
     cross_correlation: CrossCorrelation,
@@ -138,7 +139,7 @@ impl CorrelationMatch {
             min_value = self.result_buffer[end];
         }
         for (index, [a, b, c]) in IterWindows::from(self.result_buffer.iter().copied()).enumerate() {
-            if let Some((x, y)) = parabolic_interpolation::get_minimum_point(a, b, c) {
+            if let Some((x, y)) = parabolic_interpolation::parabolic_interpolation_minimum(a, b, c) {
                 let position = index as Num + x;
                 self.minima.push((position, y));
                 if y < min_value {

@@ -4,7 +4,7 @@ use crate::math::*;
 
 #[test]
 fn fft_ifft_results_in_original() {
-    let prepared = fft::Prepared::new(8);
+    let prepared = fft::Fft::new(8);
     let array = complex_vec(&[
         (0.99939176, 0.00832791),
         (-0.08551277, -0.89168611),
@@ -23,7 +23,7 @@ fn fft_ifft_results_in_original() {
 
 #[test]
 fn fft_unit_impulse() {
-    let prepared = fft::Prepared::new(8);
+    let prepared = fft::Fft::new(8);
     let mut buffer = vec![(0., 0.).into(); 8];
     buffer[1] = (1., 0.).into();
 
@@ -36,7 +36,7 @@ fn fft_unit_impulse() {
 
 #[test]
 fn fft_random() {
-    let prepared = fft::Prepared::new(8);
+    let prepared = fft::Fft::new(8);
     let mut buffer = complex_vec(&[
         (0.99939176, 0.00832791),
         (-0.08551277, -0.89168611),

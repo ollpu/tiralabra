@@ -1,4 +1,4 @@
-//! Wrapper for [`correlation_match`], providing functionality for displaying a waveform.
+//! Wrapper for [`CorrelationMatch`], providing functionality for displaying a waveform.
 
 use crate::math::*;
 use crate::util::{shift_right, shift_left, shift_right_fill, shift_left_fill};
@@ -18,10 +18,13 @@ pub struct DisplayBuffer {
 }
 
 impl DisplayBuffer {
-    /// Construct a new `DisplayBuffer` with given input buffer size and display
+    /// Construct a new [`DisplayBuffer`] with given input buffer size and display
     /// buffer size.
     ///
     /// `input_size` must be at least as learge as `display_size`.
+    ///
+    /// The weight function is populated with a Hann window, so the center of the display is
+    /// prioritized when matching.
     pub fn new(input_size: usize, display_size: usize) -> Self {
         assert!(input_size >= display_size);
         let weight = (0..display_size)
@@ -60,7 +63,7 @@ impl DisplayBuffer {
     }
 
     /// Get a mutable reference to the input buffer. If it is mutated, remember to call
-    /// [`update_match`] afterwards.
+    /// [`update_match`](Self::update_match) afterwards.
     ///
     /// The length of the slice is `input_size` given on construction.
     pub fn get_buffer_mut(&mut self) -> &mut [Num] {
@@ -77,7 +80,7 @@ impl DisplayBuffer {
     /// `average = coeff * new + (1. - coeff) * average;`  
     /// Set to `1.0` to bypass smoothing.
     ///
-    /// [`update_display`] should be called separately to update the display buffer.
+    /// [`update_display`](Self::update_display) should be called separately to update the display buffer.
     pub fn update_match(&mut self, stabilize: bool, memory_decay: Num, period_decay: Num) {
         if stabilize {
             let (offset, interval) =
@@ -99,7 +102,7 @@ impl DisplayBuffer {
 
     /// Update the display buffer based on the newest input data and matched offset.
     ///
-    /// This method may be called more often than ['update_match`], even when
+    /// This method may be called more often than [`update_match`](Self::update_match), even when
     /// there is no new data, to animate smoothly.
     pub fn update_display(&mut self, display_decay: Num) {
         for (index, item) in self.display.iter_mut().enumerate() {
@@ -115,7 +118,7 @@ impl DisplayBuffer {
     }
 
     /// Retrieve the contents of the memory buffer. This is what is used to find a
-    /// match in [`update_match`].
+    /// match in [`update_match`](Self::update_match).
     ///
     /// The length of the slice is `display_size` given on construction.
     pub fn get_memory(&self) -> &[Num] {

@@ -1,16 +1,15 @@
-//! Implements the FFT, i.e. Fast Fourier Transform, and its inverse.
-
 use crate::math::*;
 
-/// A structure that is initialized beforehand, and contains twiddle-factors for
-/// a specific transform size. For now, nothing is saved here and everything is
-/// computed in the main routine.
-pub struct Prepared {
+/// Implements the FFT, i.e. Fast Fourier Transform, and its inverse.
+///
+/// This structure is initialized beforehand, and contains twiddle-factors for
+/// a specific transform size. 
+pub struct Fft {
     size: usize,
     twiddle_factors: Vec<Complex>,
 }
 
-impl Prepared {
+impl Fft {
     /// Prepare FFT. Size has to be a power of two.
     pub fn new(size: usize) -> Self {
         assert!(size.count_ones() == 1);
@@ -19,7 +18,7 @@ impl Prepared {
         let twiddle_factors = (0..half_size)
             .map(|i| Complex::euler(-(i as Num) * half_size_inverse * PI))
             .collect();
-        Prepared {
+        Fft {
             size,
             twiddle_factors,
         }

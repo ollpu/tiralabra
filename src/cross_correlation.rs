@@ -1,14 +1,15 @@
-//! Computes cross correlation efficiently, using FFT.
 
 use crate::fft;
 use crate::math::*;
 use std::array::IntoIter;
 
-/// A structure prepared to perform cross correlations up to a given maximum size.
+/// Computes cross correlation efficiently, using FFT.
+///
+/// This structure is prepared to perform cross correlations up to a given maximum size.
 pub struct CrossCorrelation {
     base_size: usize,
     fft_size: usize,
-    fft: fft::Prepared,
+    fft: fft::Fft,
     buffer: Vec<Complex>,
 }
 
@@ -21,7 +22,7 @@ impl CrossCorrelation {
         CrossCorrelation {
             base_size,
             fft_size,
-            fft: fft::Prepared::new(fft_size),
+            fft: fft::Fft::new(fft_size),
             buffer: vec![(0., 0.).into(); fft_size],
         }
     }
