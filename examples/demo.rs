@@ -18,6 +18,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             44100.
         }
     };
+    println!("Näytteenottotaajuus: {}", sample_rate);
     let plot = Plot::new(consume_handle, sample_rate);
     let app = Application::new(move |state, window| {
         state.add_theme(style::themes::DEFAULT_THEME);
