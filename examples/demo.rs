@@ -11,11 +11,14 @@ use tiralabra::ring_buffer;
 static THEME: &'static str = include_str!("theme.css");
 fn main() -> Result<(), Box<dyn Error>> {
     let (publish_handle, consume_handle) = ring_buffer::with_capacity(8 * N);
-    match setup_audio(publish_handle) {
-        Ok(_) => {},
-        Err(e) => eprintln!("Mikrofonin avaaminen ei onnistunut: {:?}\nVoit silti käyttää testisignaalia!", e),
-    }
-    let plot = Plot::new(consume_handle);
+    let sample_rate = match setup_audio(publish_handle) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("Mikrofonin avaaminen ei onnistunut: {:?}\nVoit silti käyttää testisignaalia!", e);
+            44100.
+        }
+    };
+    let plot = Plot::new(consume_handle, sample_rate);
     let app = Application::new(move |state, window| {
         state.add_theme(style::themes::DEFAULT_THEME);
         state.add_theme(THEME);
@@ -34,20 +37,21 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn err_fn(err: cpal::StreamError) {
     eprintln!("Virhe äänilaitteen kanssa: {}", err);
 }
-fn setup_audio(publish_handle: ring_buffer::Producer<f32>) -> Result<(), Box<dyn Error>> {
+fn setup_audio(publish_handle: ring_buffer::Producer<f32>) -> Result<f32, Box<dyn Error>> {
     let host = cpal::default_host();
     let device = host.default_input_device().ok_or("Äänilaitetta ei löydetty")?;
     eprintln!("Käytetään äänilaitetta: \"{}\"", device.name()?);
     let config = device.default_input_config()?;
     let sample_format = config.sample_format();
     let config: cpal::StreamConfig = config.into();
+    let sample_rate = config.sample_rate.0 as f32;
     let plot_ingest = PlotIngest::new(config.channels as usize, publish_handle);
     match sample_format {
         cpal::SampleFormat::F32 => run_audio::<f32>(device, config, plot_ingest)?,
         cpal::SampleFormat::I16 => run_audio::<i16>(device, config, plot_ingest)?,
         cpal::SampleFormat::U16 => run_audio::<u16>(device, config, plot_ingest)?,
     }
-    Ok(())
+    Ok(sample_rate)
 }
 fn run_audio<T: cpal::Sample>(
     device: cpal::Device,
@@ -124,6 +128,7 @@ impl PlotIngest {
 use tiralabra::display::DisplayBuffer;
 struct Plot {
     consume_handle: ring_buffer::Consumer<f32>,
+    sample_rate: f32,
     test_signal_generator: TestSignal,
     display: DisplayBuffer,
     stabilize_enabled: bool,
@@ -140,9 +145,10 @@ fn decay_time_to_factor(time: f32) -> f32 {
 }
 
 impl Plot {
-    pub fn new(consume_handle: ring_buffer::Consumer<f32>) -> Self {
+    pub fn new(consume_handle: ring_buffer::Consumer<f32>, sample_rate: f32) -> Self {
         Plot {
             consume_handle,
+            sample_rate,
             test_signal_generator: TestSignal::new(),
             display: DisplayBuffer::new(N, M),
             stabilize_enabled: true,
@@ -196,8 +202,8 @@ impl Widget for Plot {
         }
         self.display.update_display(self.display_decay);
         let (offset, residual) = self.display.get_offset();
-        let interval = self.display.get_interval();
-        let frequency = 44100. / interval;
+        let interval = self.display.get_period();
+        let frequency = self.sample_rate / interval;
 
         // Draw offset indicator
         canvas.clear_rect((x + 0.4 * w) as u32, (y + h - 40.) as u32, (0.2 * w) as u32, 15, Color::rgb(70, 70, 70));
@@ -205,11 +211,13 @@ impl Widget for Plot {
         let span = M as f32 / N as f32;
         canvas.clear_rect((x + (0.4 + 0.2 * pos) * w) as u32, (y + h - 40.) as u32, (0.2 * span * w) as u32, 15, Color::rgb(90, 90, 90));
         // Draw frequency
-        let mut paint = femtovg::Paint::default();
-        paint.set_font(&[state.fonts.regular.unwrap()]);
-        paint.set_font_size(24.);
-        paint.set_color(Color::white());
-        canvas.fill_text(x + 20., y + h - 21., format!("{:.2} Hz", frequency), paint).unwrap();
+        if self.stabilize_enabled {
+            let mut paint = femtovg::Paint::default();
+            paint.set_font(&[state.fonts.regular.unwrap()]);
+            paint.set_font_size(24.);
+            paint.set_color(Color::white());
+            canvas.fill_text(x + 20., y + h - 21., format!("{:.2} Hz", frequency), paint).unwrap();
+        }
         if self.show_memory {
             let mut path = Path::new();
             let mut points = self
