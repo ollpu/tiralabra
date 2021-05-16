@@ -28,13 +28,7 @@ impl Fft {
     /// this instance was prepared with.
     pub fn fft(&self, array: &mut [Complex]) {
         assert!(array.len() == self.size);
-        // Interlacing. Indexes are permuted such that their binary representation is reversed.
-        for index in 0..self.size {
-            let reversed = index.reverse_bits() >> (self.size.leading_zeros() + 1);
-            if reversed > index {
-                array.swap(index, reversed);
-            }
-        }
+        permute_binary_reverse(array);
         // The "butterfly figure" - the main computation. Performed for each size
         // 2, 4, 8 ... in increasing order.
         for half_width in (0..).map(|e| 1 << e).take_while(|w| *w < self.size) {
@@ -69,6 +63,20 @@ impl Fft {
         // so that the inverse transform actually restores the original array.
         for z in array.iter_mut() {
             *z = *z / self.size as Num;
+        }
+    }
+}
+
+/// Permutes an array such that the binary representation of each index is
+/// reversed.
+///
+/// Assumes that `array` has a length that is a power of two.
+fn permute_binary_reverse<T>(array: &mut [T]) {
+    let shift_amount = array.len().leading_zeros() + 1;
+    for index in 0..array.len() {
+        let reversed = index.reverse_bits() >> shift_amount;
+        if reversed > index {
+            array.swap(index, reversed);
         }
     }
 }
