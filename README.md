@@ -13,29 +13,29 @@ Ubuntulla tai muilla Debian-pohjaisilla tulee myös asentaa ALSA-kirjaston kehit
 
 Aja sitten demo suorittamalla (grafiikkakirjastojen kääntämisessä kestää jonkin aikaa)
 
-```sh
+```
 cargo run --release --example demo
 ```
 
-#### [Demon käyttöohjeet](dokumentaatio/käyttöohje.md)
+[Demon käyttöohjeet](dokumentaatio/käyttöohje.md)
 
 Testit voidaan ajaa suorittamalla
 
-```sh
+```
 cargo test --no-default-features
 ```
 
 ## Dokumentaatio
 
-#### [Koodin dokumentaatio](https://ollpu.github.io/tiralabra)
-#### [Määrittelydokumentti](dokumentaatio/määrittelydokumentti.md)
-#### [Toteutusdokumentti](dokumentaatio/toteutusdokumentti.pdf)
-#### [Testausdokumentti](dokumentaatio/testausdokumentti.md)
+[Koodin dokumentaatio](https://ollpu.github.io/tiralabra)  
+[Määrittelydokumentti](dokumentaatio/määrittelydokumentti.md)  
+[Toteutusdokumentti](dokumentaatio/toteutusdokumentti.pdf)  
+[Testausdokumentti](dokumentaatio/testausdokumentti.md)  
 
 ## Viikkoraportit
 
-#### [Viikkoraportti 1](dokumentaatio/viikkoraportti1.md)
-#### [Viikkoraportti 2](dokumentaatio/viikkoraportti2.md)
-#### [Viikkoraportti 3](dokumentaatio/viikkoraportti3.md)
-#### [Viikkoraportti 4](dokumentaatio/viikkoraportti4.md)
-#### [Viikkoraportti 5](dokumentaatio/viikkoraportti5.md)
+[Viikkoraportti 1](dokumentaatio/viikkoraportti1.md)  
+[Viikkoraportti 2](dokumentaatio/viikkoraportti2.md)  
+[Viikkoraportti 3](dokumentaatio/viikkoraportti3.md)  
+[Viikkoraportti 4](dokumentaatio/viikkoraportti4.md)  
+[Viikkoraportti 5](dokumentaatio/viikkoraportti5.md)  
