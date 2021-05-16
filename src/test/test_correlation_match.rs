@@ -55,10 +55,10 @@ fn correlation_match_period() {
     const N: usize = 32;
     const M: usize = 16;
     let mut matcher = CorrelationMatch::new(N);
-    let interval = 6.137241;
-    let a: Vec<_> = (0..N).map(|i| ((i as f32 / interval) * 2. * PI).sin()).collect();
+    let period = 6.137241;
+    let a: Vec<_> = (0..N).map(|i| ((i as f32 / period) * 2. * PI).sin()).collect();
     let pos = 13;
     let w = vec![1.; M];
-    let (_, measured_interval) = matcher.compute(&a, &a[pos..][..M], &w);
-    assert!(float_eq(measured_interval.unwrap(), interval, 2));
+    let (_, measured_period) = matcher.compute(&a, &a[pos..][..M], &w);
+    assert!(float_eq(measured_period.unwrap(), period, 2));
 }

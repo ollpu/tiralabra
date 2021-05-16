@@ -36,7 +36,7 @@ Tässä on eritelty pääkomponenttien olennaisimmat testit:
   - [cross_correlation_both_max_size](/src/test/test_cross_correlation.rs#L27)
 
     Kovakoodatut taulukot, jotka ovat molemmat saman kahden potenssin pituisia. Testi pyrkii
-    varmistamaan, että tulos ei "vuoda ympäri".
+    varmistamaan, ettei tulos "vuoda ympäri".
 - Korrelaatiotäsmäys
   - [random_correlation_match](/src/test/test_correlation_match.rs#L23)
 
@@ -114,9 +114,13 @@ Kaikki suorituskykytestit voidaan ajaa siirtymällä hakemiston `suorituskyky`, 
 cargo bench
 ```
 
-Tulokset kootaan kansioon `suorituskyky/target/criterion/`.
+Tulokset kootaan kansioon `suorituskyky/target/criterion/` selattavaan HTML-muotoon.
 
 ### [FFT](/suorituskyky/benches/fft_performance.rs)
+
+```
+cargo bench --bench fft_performance
+```
 
 FFT:lle on kirjoitettu kaksi erilaista suorituskykytestiä.
 
@@ -138,8 +142,6 @@ mitattuun suoritusaikaan.
 Tässä versiossa taulukko palautetaan ennalleen suorittamalla myös
 käänteismuunnos. Samalla testataan käänteismuunnoksen suorituskykyä -
 ideaalitapauksessa se ei ole juurikaan hitaampi kuin varsinainen muunnos.
-
-*sijoita lopulliset tulokset tähän*
 
 #### Twiddle-kertoimien optimointi
 
@@ -168,6 +170,59 @@ Keskimääräiset suoritusajat (ennen (µs); jälkeen (µs); muutos):
 | 8192  | 715,034; 177,009; 75,2 %  | 1449,134; 354,259; 75,6 % |
 | 16384 | 1638,992; 386,527; 76,4 % | 3242,291; 759,725; 76,6 % |
 
-#### Vanha kuvaaja
+Algorimtin aikavaativuus on teoriassa `O(n log n)`. Logaritmikerroin ei kuitenkaan ole
+ilmeinen log-log-kuvaajassa. Alla testien keskimääräiset suoritusajat uusimmalla
+toteutuksella, suhteutettuna kokoon. Yksikkö on nanosekunti.
 
-![](suorituskykykuvaajat/fft1.svg)
+| koko  | copy-and-fft | fft-and-ifft |
+| ----- | ------------ | ------------ |
+| 64    | 10,719       | 22,547       |
+| 128   | 12,422       | 26,516       |
+| 256   | 13,871       | 28,285       |
+| 512   | 15,084       | 30,400       |
+| 1024  | 16,731       | 33,238       |
+| 2048  | 17,923       | 36,117       |
+| 4096  | 19,336       | 41,041       |
+| 8192  | 21,608       | 43,245       |
+| 16384 | 23,592       | 46,370       |
+
+### [Korrelaatiotäsmäys](/suorituskyky/benches/correlation_match_performance.rs)
+
+```
+cargo bench --bench correlation_match_performance
+```
+
+Korrelaatiotäsmäyksen suorituskykyä testataan (deterministisillä) satunnaisluvuilla.
+Taulukossa A on kokoparametrin verran satunnaislukuja välillä `[0, 1]`. Taulukoksi
+B valitaan tästä satunnainen osa, jonka pituus on puolet.
+
+Testi suoritetaan erikseen koilla `512, 768, 1024, 1280, 1536, 1792, 2048`.
+
+![](suorituskykykuvaajat/korrelaatiotäsmäys.png)
+
+Keskimääräiset suoritusajat (µs):
+
+| koko | correlation-match |
+| ---- | ----------------- |
+| 512  | 85,898  |
+| 768  | 203,418 |
+| 1024 | 224,487 |
+| 1280 | 471,113 | 
+| 1536 | 469,268 |
+| 1792 | 475,502 |
+| 2048 | 463,295 |
+
+Toteutettu FFT-algoritmi toimii vain koilla, jotka ovat kahden potensseja.
+Siispä korrelaatiotäsmäys hidastuu merkittävästi aina, kun ylitetään kahden potenssi.
+
+Korrelaatiotäsmäyksessä tehtävän FFT:n on oltava kooltaan kaksinkertainen syötteen
+kokoon nähden. Algoritmin aikana tehdään kaksi muunnos-käänteismuunnos-paria.
+
+`fft-and-ifft`-testistä koon `4096` suoritusaika kaksinkertaistettuna, eli
+
+```
+168,102 * 2 = 336,204
+```
+
+on samaa kokoluokkaa kuin koon `2048` korrelaatiotäsmäyksen suoritusaika.
+Voidaan tehdä johtopäätös, että FFT on algoritmin pullonkaula.

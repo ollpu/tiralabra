@@ -39,11 +39,14 @@ for parameter in p.iterdir():
             baseline_data[name].append((value, a, b, c))
 
 values.sort()
+linear = len(values) <= 2 or values[2] - values[1] == values[1] - values[0]
 plt.title(benchmark_name)
-plt.xscale("log")
+if not linear:
+    plt.xscale("log")
 plt.xticks(values)
 plt.xlabel("input")
-plt.yscale("log")
+if not linear:
+    plt.yscale("log")
 plt.ylabel("time (µs)")
 plt.gca().get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 comp = [[] for x in values]
@@ -56,8 +59,12 @@ for name, data in baseline_data.items():
     confidence = np.abs(confidence - points)
     #plt.errorbar(values, points, yerr=confidence, linestyle="solid", marker="o")
     plt.plot(values, points, label=name, marker="o")
-for old, new in comp:
-    change = (old-new)/old * 100
-    print(f"{old:.3f}; {new:.3f}; {change:.1f} %".replace(".", ","))
+for values in comp:
+    if len(values) == 2:
+        old, new = values
+        change = (old-new)/old * 100
+        print(f"{old:.3f}; {new:.3f}; {change:.1f} %".replace(".", ","))
+    else:
+        print(";".join(f"{value:.3f}" for value in values).replace(".", ","))
 plt.legend()
 plt.show()
