@@ -14,7 +14,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sample_rate = match setup_audio(publish_handle) {
         Ok(s) => s,
         Err(e) => {
-            eprintln!("Mikrofonin avaaminen ei onnistunut: {:?}\nVoit silti käyttää testisignaalia!", e);
+            eprintln!(
+                "Mikrofonin avaaminen ei onnistunut: {:?}\nVoit silti käyttää testisignaalia!",
+                e
+            );
             44100.
         }
     };
@@ -40,7 +43,9 @@ fn err_fn(err: cpal::StreamError) {
 }
 fn setup_audio(publish_handle: ring_buffer::Producer<f32>) -> Result<f32, Box<dyn Error>> {
     let host = cpal::default_host();
-    let device = host.default_input_device().ok_or("Äänilaitetta ei löydetty")?;
+    let device = host
+        .default_input_device()
+        .ok_or("Äänilaitetta ei löydetty")?;
     eprintln!("Käytetään äänilaitetta: \"{}\"", device.name()?);
     let config = device.default_input_config()?;
     let sample_format = config.sample_format();
@@ -191,20 +196,42 @@ impl Widget for Plot {
 
         match self.audio_source {
             AudioSource::Microphone => {
-                while self.consume_handle.pop_full(self.display.get_buffer_mut()).is_ok() {
-                    self.display.update_match(self.stabilize_enabled, self.memory_decay, self.display_decay);
+                while self
+                    .consume_handle
+                    .pop_full(self.display.get_buffer_mut())
+                    .is_ok()
+                {
+                    self.display.update_match(
+                        self.stabilize_enabled,
+                        self.memory_decay,
+                        self.display_decay,
+                    );
                 }
             }
             AudioSource::TestSine => {
                 self.consume_handle.discard_all();
-                if self.test_signal_generator.get(self.display.get_buffer_mut(), false) {
-                    self.display.update_match(self.stabilize_enabled, self.memory_decay, self.display_decay);
+                if self
+                    .test_signal_generator
+                    .get(self.display.get_buffer_mut(), false)
+                {
+                    self.display.update_match(
+                        self.stabilize_enabled,
+                        self.memory_decay,
+                        self.display_decay,
+                    );
                 }
             }
             AudioSource::TestModulating => {
                 self.consume_handle.discard_all();
-                if self.test_signal_generator.get(self.display.get_buffer_mut(), true) {
-                    self.display.update_match(self.stabilize_enabled, self.memory_decay, self.display_decay);
+                if self
+                    .test_signal_generator
+                    .get(self.display.get_buffer_mut(), true)
+                {
+                    self.display.update_match(
+                        self.stabilize_enabled,
+                        self.memory_decay,
+                        self.display_decay,
+                    );
                 }
             }
         }
@@ -214,17 +241,31 @@ impl Widget for Plot {
         let frequency = self.sample_rate / interval;
 
         // Draw offset indicator
-        canvas.clear_rect((x + 0.4 * w) as u32, (y + h - 40.) as u32, (0.2 * w) as u32, 15, Color::rgb(70, 70, 70));
+        canvas.clear_rect(
+            (x + 0.4 * w) as u32,
+            (y + h - 40.) as u32,
+            (0.2 * w) as u32,
+            15,
+            Color::rgb(70, 70, 70),
+        );
         let pos = offset as f32 / N as f32;
         let span = M as f32 / N as f32;
-        canvas.clear_rect((x + (0.4 + 0.2 * pos) * w) as u32, (y + h - 40.) as u32, (0.2 * span * w) as u32, 15, Color::rgb(90, 90, 90));
+        canvas.clear_rect(
+            (x + (0.4 + 0.2 * pos) * w) as u32,
+            (y + h - 40.) as u32,
+            (0.2 * span * w) as u32,
+            15,
+            Color::rgb(90, 90, 90),
+        );
         // Draw frequency
         if self.stabilize_enabled {
             let mut paint = femtovg::Paint::default();
             paint.set_font(&[state.fonts.regular.unwrap()]);
             paint.set_font_size(24.);
             paint.set_color(Color::white());
-            canvas.fill_text(x + 20., y + h - 21., format!("{:.2} Hz", frequency), paint).unwrap();
+            canvas
+                .fill_text(x + 20., y + h - 21., format!("{:.2} Hz", frequency), paint)
+                .unwrap();
         }
         if self.show_memory {
             let mut path = Path::new();
@@ -242,12 +283,12 @@ impl Widget for Plot {
             canvas.stroke_path(&mut path, Paint::color(Color::rgb(12, 170, 255)));
         }
         let mut path = Path::new();
-        let mut points = self
-            .display
-            .get_display()
-            .iter()
-            .enumerate()
-            .map(|(i, v)| (x + w / M as f32 * (i as f32 - residual), y + h / 2. - v * h / 2.));
+        let mut points = self.display.get_display().iter().enumerate().map(|(i, v)| {
+            (
+                x + w / M as f32 * (i as f32 - residual),
+                y + h / 2. - v * h / 2.,
+            )
+        });
         let (x, y) = points.next().unwrap();
         path.move_to(x, y);
         for (x, y) in points {
@@ -310,35 +351,39 @@ impl Widget for Control {
         entity.set_element(state, "control");
         entity.set_layout_type(state, LayoutType::Column);
         let (_, _, dropdown) = Dropdown::new("Äänilähde").build(state, entity, |b| {
-            b
-                .set_height(Pixels(30.0))
-                .set_width(Stretch(1.0))
+            b.set_height(Pixels(30.0)).set_width(Stretch(1.0))
         });
         let options = List::new().build(state, dropdown, |b| b);
         CheckButton::new(true)
-            .on_checked(Event::new(PlotControlEvent::Source(AudioSource::Microphone)).propagate(Propagation::All))
+            .on_checked(
+                Event::new(PlotControlEvent::Source(AudioSource::Microphone))
+                    .propagate(Propagation::All),
+            )
             .build(state, options, |b| {
-            b
-                .set_text("Mikrofoni")
-                .set_height(Pixels(30.0))
-                .set_child_left(Pixels(5.0))
-        });
+                b.set_text("Mikrofoni")
+                    .set_height(Pixels(30.0))
+                    .set_child_left(Pixels(5.0))
+            });
         CheckButton::new(false)
-            .on_checked(Event::new(PlotControlEvent::Source(AudioSource::TestSine)).propagate(Propagation::All))
+            .on_checked(
+                Event::new(PlotControlEvent::Source(AudioSource::TestSine))
+                    .propagate(Propagation::All),
+            )
             .build(state, options, |b| {
-            b
-                .set_text("Testi: Siniaalto")
-                .set_height(Pixels(30.0))
-                .set_child_left(Pixels(5.0))
-        });
+                b.set_text("Testi: Siniaalto")
+                    .set_height(Pixels(30.0))
+                    .set_child_left(Pixels(5.0))
+            });
         CheckButton::new(false)
-            .on_checked(Event::new(PlotControlEvent::Source(AudioSource::TestModulating)).propagate(Propagation::All))
+            .on_checked(
+                Event::new(PlotControlEvent::Source(AudioSource::TestModulating))
+                    .propagate(Propagation::All),
+            )
             .build(state, options, |b| {
-            b
-                .set_text("Testi: Vaihtuva")
-                .set_height(Pixels(30.0))
-                .set_child_left(Pixels(5.0))
-        });
+                b.set_text("Testi: Vaihtuva")
+                    .set_height(Pixels(30.0))
+                    .set_child_left(Pixels(5.0))
+            });
         let checkbox = Row::new().build(state, entity, |builder| builder.class("check"));
         Checkbox::new(true)
             .on_checked(Event::new(PlotControlEvent::Stabilize(true)).propagate(Propagation::All))

@@ -1,4 +1,4 @@
-use crate::util::{shift_left, shift_right, shift_left_fill, shift_right_fill, IterWindows};
+use crate::util::{shift_left, shift_left_fill, shift_right, shift_right_fill, IterWindows};
 
 #[test]
 fn shift_left_example() {

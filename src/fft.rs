@@ -3,7 +3,7 @@ use crate::math::*;
 /// Implements the FFT, i.e. Fast Fourier Transform, and its inverse.
 ///
 /// This structure is initialized beforehand, and contains twiddle-factors for
-/// a specific transform size. 
+/// a specific transform size.
 pub struct Fft {
     size: usize,
     twiddle_factors: Vec<Complex>,

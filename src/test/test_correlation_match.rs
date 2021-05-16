@@ -2,8 +2,8 @@ mod test_parabolic_interpolation;
 
 use crate::correlation_match::CorrelationMatch;
 
-use crate::math::*;
 use super::util::*;
+use crate::math::*;
 
 use rand::prelude::*;
 use rand::rngs::SmallRng;
@@ -40,12 +40,14 @@ fn correlation_match_subsample_accuracy() {
     const N: usize = 32;
     let mut matcher = CorrelationMatch::new(N);
     let pos = 5.315237;
-    let a: Vec<_> = (0..N).map(|i| ((i as f32 / N as f32) * 2. * PI).sin()).collect();
-    let b: Vec<_> = (0..N/2)
+    let a: Vec<_> = (0..N)
+        .map(|i| ((i as f32 / N as f32) * 2. * PI).sin())
+        .collect();
+    let b: Vec<_> = (0..N / 2)
         .map(|i| i as f32 + pos)
         .map(|i| ((i / N as f32) * 2. * PI).sin())
         .collect();
-    let w = vec![1.; N/2];
+    let w = vec![1.; N / 2];
     let (offset, _) = matcher.compute(&a, &b, &w);
     assert!(float_eq(offset, pos, 2));
 }
@@ -56,7 +58,9 @@ fn correlation_match_period() {
     const M: usize = 16;
     let mut matcher = CorrelationMatch::new(N);
     let period = 6.137241;
-    let a: Vec<_> = (0..N).map(|i| ((i as f32 / period) * 2. * PI).sin()).collect();
+    let a: Vec<_> = (0..N)
+        .map(|i| ((i as f32 / period) * 2. * PI).sin())
+        .collect();
     let pos = 13;
     let w = vec![1.; M];
     let (_, measured_period) = matcher.compute(&a, &a[pos..][..M], &w);

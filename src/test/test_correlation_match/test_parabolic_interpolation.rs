@@ -1,5 +1,5 @@
-use crate::test::util::*;
 use crate::correlation_match::parabolic_interpolation::parabolic_interpolation_minimum;
+use crate::test::util::*;
 
 #[test]
 fn simple_parabola_minimum() {
@@ -19,4 +19,3 @@ fn random_parabola_minimum() {
 fn parabola_minimum_degenerate() {
     assert!(parabolic_interpolation_minimum(1., 2., 3.).is_none());
 }
-

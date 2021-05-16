@@ -1,4 +1,3 @@
-
 use crate::math::*;
 
 const EPS: Num = 1e-8;

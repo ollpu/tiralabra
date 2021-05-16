@@ -1,4 +1,3 @@
-
 use crate::fft;
 use crate::math::*;
 use std::array::IntoIter;
@@ -30,7 +29,6 @@ impl CrossCorrelation {
     /// Compute cross correlation including partially overlapping positions.
     /// Length of `a` and `b` must not exceed the maximum size given in `new`.
     /// Returns an interator of the results. The length of the result is `a.len() + b.len() - 1`.
-    #[allow(dead_code)]
     pub fn compute(&mut self, a: &[Num], b: &[Num]) -> impl Iterator<Item = Num> + '_ {
         self.compute_raw(a, b);
         // The beginning of the result is read from the end of the buffer, rest normally

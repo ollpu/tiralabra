@@ -24,7 +24,11 @@ impl TestSignal {
                 } else {
                     modulator = 0.;
                 }
-                *sample = 0.8 * osc(&mut self.oscillator_phase, BASE_FREQUENCY * (1. + 0.109 * modulator));
+                *sample = 0.8
+                    * osc(
+                        &mut self.oscillator_phase,
+                        BASE_FREQUENCY * (1. + 0.109 * modulator),
+                    );
             }
             self.counter = 1;
             true

@@ -57,8 +57,7 @@ pub struct IterWindows<T, I, const N: usize> {
     array: [T; N],
 }
 
-impl<T: Copy + Default, I: Iterator<Item=T>, const N: usize> IterWindows<T, I, N>
-{
+impl<T: Copy + Default, I: Iterator<Item = T>, const N: usize> IterWindows<T, I, N> {
     /// Construct an `IterWindows` from another iterator.
     pub fn from(mut source: I) -> Self {
         let mut array = [Default::default(); N];
@@ -69,7 +68,7 @@ impl<T: Copy + Default, I: Iterator<Item=T>, const N: usize> IterWindows<T, I, N
     }
 }
 
-impl<T: Copy + Default, I: Iterator<Item=T>, const N: usize> Iterator for IterWindows<T, I, N> {
+impl<T: Copy + Default, I: Iterator<Item = T>, const N: usize> Iterator for IterWindows<T, I, N> {
     type Item = [T; N];
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(item) = self.source.next() {

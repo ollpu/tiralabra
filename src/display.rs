@@ -1,8 +1,8 @@
 //! Wrapper for [`CorrelationMatch`], providing functionality for displaying a waveform.
 
-use crate::math::*;
-use crate::util::{shift_right, shift_left, shift_right_fill, shift_left_fill};
 use crate::correlation_match::CorrelationMatch;
+use crate::math::*;
+use crate::util::{shift_left, shift_left_fill, shift_right, shift_right_fill};
 
 /// Stores a prepared [`CorrelationMatch`] and buffers for display and memory.
 pub struct DisplayBuffer {
@@ -49,16 +49,22 @@ impl DisplayBuffer {
     ///
     /// Missing data is retrieved from the input buffer, or replaced with zeros if not available.
     pub fn scroll(&mut self, amount: i32) {
-        if amount > 0 {
-            let amount = amount as usize;
-            shift_right_fill(&mut self.buffer, amount, 0.);
-            shift_right(&mut self.display, &self.buffer[self.offset..][..amount]);
-            shift_right(&mut self.memory, &self.buffer[self.offset..][..amount]);
-        } else if amount < 0 {
-            let amount = -amount as usize;
-            shift_left_fill(&mut self.buffer, amount, 0.);
-            shift_left(&mut self.display, &self.buffer[self.offset + self.size - amount..][..amount]);
-            shift_left(&mut self.memory, &self.buffer[self.offset + self.size - amount..][..amount]);
+        match amount {
+            amount if amount > 0 => {
+                let amount = amount as usize;
+                shift_right_fill(&mut self.buffer, amount, 0.);
+                let replace_range = &self.buffer[self.offset..][..amount];
+                shift_right(&mut self.display, replace_range);
+                shift_right(&mut self.memory, replace_range);
+            }
+            amount if amount < 0 => {
+                let amount = -amount as usize;
+                shift_left_fill(&mut self.buffer, amount, 0.);
+                let replace_range = &self.buffer[self.offset + self.size - amount..][..amount];
+                shift_left(&mut self.display, replace_range);
+                shift_left(&mut self.memory, replace_range);
+            }
+            _ => {}
         }
     }
 
@@ -85,14 +91,16 @@ impl DisplayBuffer {
         if stabilize {
             let (offset, interval) =
                 self.correlation_matcher
-                .compute(&self.buffer, &self.memory, &self.weight);
+                    .compute(&self.buffer, &self.memory, &self.weight);
             let rounded = offset.round();
             self.offset = rounded as usize;
             self.residual += offset - rounded;
-            self.offset = (self.offset as i64 + self.residual as i64).clamp(0, self.buffer.len() as i64 - 1) as usize;
+            self.offset = (self.offset as i64 + self.residual as i64)
+                .clamp(0, self.buffer.len() as i64 - 1) as usize;
             self.residual = self.residual.fract();
             if let Some(interval) = interval {
-                self.average_period = period_decay * interval + (1. - period_decay) * self.average_period;
+                self.average_period =
+                    period_decay * interval + (1. - period_decay) * self.average_period;
             }
         }
         for (index, item) in self.memory.iter_mut().enumerate() {

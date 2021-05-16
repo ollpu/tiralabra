@@ -1,4 +1,3 @@
-
 pub mod parabolic_interpolation;
 use parabolic_interpolation::parabolic_interpolation_minimum;
 
@@ -139,7 +138,8 @@ impl CorrelationMatch {
             min_position = end as Num;
             min_value = self.result_buffer[end];
         }
-        for (index, [a, b, c]) in IterWindows::from(self.result_buffer.iter().copied()).enumerate() {
+        for (index, [a, b, c]) in IterWindows::from(self.result_buffer.iter().copied()).enumerate()
+        {
             if let Some((x, y)) = parabolic_interpolation_minimum(a, b, c) {
                 let position = index as Num + x;
                 self.minima.push((position, y));
