@@ -9,6 +9,7 @@ cargo test --no-default-features
 ```
 
 Toteutukset löytyvät hakemistosta [src/test](/src/test).
+Näyttämisen logiikaalle ([src/display.rs](/src/display.rs)) ei toistaiseksi ole automaattitestejä.
 
 Tässä on eritelty pääkomponenttien olennaisimmat testit:
 
@@ -106,7 +107,7 @@ vaihteleva siniaalto.
 Suorituskykytestaus tehdään käyttäen Criterion-kirjastoa. Se suorittaa määriteltyä
 testiä useaan kertaan ja tekee jonkin verran tilastollista analyysiä.
 
-Jotkin kuvaajat on koostettu Python-skriptien (matplotlib) avulla, jotka löytyvät `suorituskyky`-hakemiston alta.
+Kuvaajat on koostettu Python-skriptien (matplotlib) avulla, jotka löytyvät `suorituskyky`-hakemiston alta.
 
 Kaikki suorituskykytestit voidaan ajaa siirtymällä hakemiston `suorituskyky`, ja ajamalla
 
@@ -125,7 +126,7 @@ cargo bench --bench fft_performance
 FFT:lle on kirjoitettu kaksi erilaista suorituskykytestiä.
 
 Molemmissa aloitetaan kokoamalla satunnaisia kompleksilukuja taulukkoon
-(molemmat komponentit välillä `[-1, 1]`) ja toistamalla sitten
+(molemmat komponentit välillä `[0, 1]`) ja toistamalla sitten
 Fourier-muunnosta tälle taulukolle.
 
 Molemmat testit suoritetaan erikseen kaikilla taulukon koilla, jotka ovat
