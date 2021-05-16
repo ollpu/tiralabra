@@ -8,15 +8,19 @@ Demoikkunan tulisi näyttää jotakuinkin tältä:
 teksti `Käytetään äänilaitetta: "laitteen nimi"` tai virheviesti, jos mikrofoni ei toimi.
 Vaihda testisignaaliin "Äänilähde"-pudotusvalikosta:
 
-![äänilähde](https://user-images.githubusercontent.com/7241014/117027961-e39b9c80-ad05-11eb-8eba-3385633b2e76.png)
+![äänilähde](https://user-images.githubusercontent.com/7241014/118395844-36a21780-b655-11eb-9b32-fe73089a37d4.png)
 
 Mikrofonilla kannattaa kokeilla esimerkiksi hyräilyä. Jos saat järjestelmäasetukset
 asetettua siten, että ohjelma monitoroi kaiuttimien uloslähtöä, voit kokeilla mitä
 tahansa äänisignaalia.
 
-Testisignaali on siniaalto, jonka taajuus vaihtelee noin 200 Hz ympärillä.
+"Testi: Siniaalto" on vakiotaajuuksinen siniaalto. "Testi: Vaihtuva" on siniaalto,
+jonka taajuus vaihtelee noin 200 Hz ympärillä.
 
-Alareunassa oleva harmaa palkki ilmaisee, mikä kohta saadusta signaalista näytetään tällä
+Hiiren rullaa käyttämällä kuvaajaa voi siirtää suhteellisesti.
+
+Alareunassa oleva teksti kertoo arvioidun perustaajuuden. Tämän vieressä oleva
+harmaa palkki ilmaisee, mikä kohta saadusta signaalista näytetään tällä
 hetkellä. Perustaajuudesta riippuen sen on tarkoituskin hyppiä edestakaisin.
 
 "Vakauta"-valintaruudusta voit ottaa algoritmin pois käytöstä. Tällöin alareunan palkki
@@ -28,6 +32,6 @@ se eroaa hieman oikeasti luetusta signaalista. Suuremmalla muistin vaimenemisaja
 algoritmi pystyy muistamaan aiemmin näytettyä kuvaajaa, eli näkymä pysyy vakaana
 riippumatta hetkellisistä häiriöistä.
 
-Kun viet hiiren muistin vaimenemisajan liu'un päälle, näkyy näytöllä toinen kuvaaja,
-joka ilmaisee muistin tämänhetkisen sisällön. Tämä on siis se taulukko, jota verrataan
-uuteen signaaliin.
+Kun viet hiiren muistin vaimenemisajan liu'un päälle, näkyy näytöllä sinisellä
+värillä toinen kuvaaja, joka ilmaisee muistin tämänhetkisen sisällön. Tämä on
+siis se taulukko, jota verrataan uuteen signaaliin.
