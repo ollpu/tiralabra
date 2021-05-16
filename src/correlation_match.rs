@@ -1,5 +1,6 @@
 
 pub mod parabolic_interpolation;
+use parabolic_interpolation::parabolic_interpolation_minimum;
 
 use crate::cross_correlation::CrossCorrelation;
 use crate::math::*;
@@ -59,8 +60,8 @@ impl CorrelationMatch {
 
     /// Compute how much `b` should be shifted (to the right) to most closely match with `a`. The
     /// array `w` is used for weighting, and it should be as long as `b`. If it can be estimated,
-    /// an interval is also returned as the second item in the tuple. This can be used to compute
-    /// the fundamental frequency of the signal.
+    /// the period of the signal is also returned as the second item in the tuple. This can be used
+    /// to compute the fundamental frequency of the signal.
     ///
     /// All arrays must be less than the maximum size given on `new`.
     pub fn compute(&mut self, a: &[Num], b: &[Num], w: &[Num]) -> (Num, Option<Num>) {
@@ -71,7 +72,7 @@ impl CorrelationMatch {
         self.compute_a_squared_term(a, w);
         self.compute_cross_term(a, b, w);
         self.compute_b_squared_term(b, w);
-        self.find_minimum_and_interval()
+        self.find_minimum_and_period()
     }
 
     fn zero_buffers(&mut self, a_len: usize, b_len: usize) {
@@ -126,7 +127,7 @@ impl CorrelationMatch {
         }
     }
 
-    fn find_minimum_and_interval(&mut self) -> (Num, Option<Num>) {
+    fn find_minimum_and_period(&mut self) -> (Num, Option<Num>) {
         let mut max_value = 1.;
         for value in &self.result_buffer {
             max_value = value.max(max_value);
@@ -139,7 +140,7 @@ impl CorrelationMatch {
             min_value = self.result_buffer[end];
         }
         for (index, [a, b, c]) in IterWindows::from(self.result_buffer.iter().copied()).enumerate() {
-            if let Some((x, y)) = parabolic_interpolation::parabolic_interpolation_minimum(a, b, c) {
+            if let Some((x, y)) = parabolic_interpolation_minimum(a, b, c) {
                 let position = index as Num + x;
                 self.minima.push((position, y));
                 if y < min_value {

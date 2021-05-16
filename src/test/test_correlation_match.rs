@@ -51,7 +51,7 @@ fn correlation_match_subsample_accuracy() {
 }
 
 #[test]
-fn correlation_match_interval() {
+fn correlation_match_period() {
     const N: usize = 32;
     const M: usize = 16;
     let mut matcher = CorrelationMatch::new(N);
