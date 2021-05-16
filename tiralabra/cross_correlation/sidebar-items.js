@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["CrossCorrelation","A structure prepared to perform cross correlations up to a given maximum size."]]});

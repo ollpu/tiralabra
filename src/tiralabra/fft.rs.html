@@ -76,20 +76,26 @@
 <span id="73">73</span>
 <span id="74">74</span>
 <span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! Implements the FFT, i.e. Fast Fourier Transform, and its inverse.</span>
-
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">math</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// A structure that is initialized beforehand, and contains twiddle-factors for</span>
-<span class="doccomment">/// a specific transform size. For now, nothing is saved here and everything is</span>
-<span class="doccomment">/// computed in the main routine.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Prepared</span> {
+<span class="doccomment">/// Implements the FFT, i.e. Fast Fourier Transform, and its inverse.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This structure is initialized beforehand, and contains twiddle-factors for</span>
+<span class="doccomment">/// a specific transform size.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Fft</span> {
     <span class="ident">size</span>: <span class="ident">usize</span>,
     <span class="ident">twiddle_factors</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Complex</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">Prepared</span> {
+<span class="kw">impl</span> <span class="ident">Fft</span> {
     <span class="doccomment">/// Prepare FFT. Size has to be a power of two.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">size</span>.<span class="ident">count_ones</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span>);
@@ -98,7 +104,7 @@
         <span class="kw">let</span> <span class="ident">twiddle_factors</span> <span class="op">=</span> (<span class="number">0</span>..<span class="ident">half_size</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">Complex</span>::<span class="ident">euler</span>(<span class="op">-</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="ident">Num</span>) <span class="op">*</span> <span class="ident">half_size_inverse</span> <span class="op">*</span> <span class="ident">PI</span>))
             .<span class="ident">collect</span>();
-        <span class="ident">Prepared</span> {
+        <span class="ident">Fft</span> {
             <span class="ident">size</span>,
             <span class="ident">twiddle_factors</span>,
         }
@@ -108,13 +114,7 @@
     <span class="doccomment">/// this instance was prepared with.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fft</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">array</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">Complex</span>]) {
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">array</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">size</span>);
-        <span class="comment">// Interlacing. Indexes are permuted such that their binary representation is reversed.</span>
-        <span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="number">0</span>..<span class="self">self</span>.<span class="ident">size</span> {
-            <span class="kw">let</span> <span class="ident">reversed</span> <span class="op">=</span> <span class="ident">index</span>.<span class="ident">reverse_bits</span>() <span class="op">&gt;</span><span class="op">&gt;</span> (<span class="self">self</span>.<span class="ident">size</span>.<span class="ident">leading_zeros</span>() <span class="op">+</span> <span class="number">1</span>);
-            <span class="kw">if</span> <span class="ident">reversed</span> <span class="op">&gt;</span> <span class="ident">index</span> {
-                <span class="ident">array</span>.<span class="ident">swap</span>(<span class="ident">index</span>, <span class="ident">reversed</span>);
-            }
-        }
+        <span class="ident">permute_binary_reverse</span>(<span class="ident">array</span>);
         <span class="comment">// The &quot;butterfly figure&quot; - the main computation. Performed for each size</span>
         <span class="comment">// 2, 4, 8 ... in increasing order.</span>
         <span class="kw">for</span> <span class="ident">half_width</span> <span class="kw">in</span> (<span class="number">0</span>..).<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">e</span>).<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">w</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">size</span>) {
@@ -149,6 +149,20 @@
         <span class="comment">// so that the inverse transform actually restores the original array.</span>
         <span class="kw">for</span> <span class="ident">z</span> <span class="kw">in</span> <span class="ident">array</span>.<span class="ident">iter_mut</span>() {
             <span class="kw-2">*</span><span class="ident">z</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">z</span> <span class="op">/</span> <span class="self">self</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">Num</span>;
+        }
+    }
+}
+
+<span class="doccomment">/// Permutes an array such that the binary representation of each index is</span>
+<span class="doccomment">/// reversed.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Assumes that `array` has a length that is a power of two.</span>
+<span class="kw">fn</span> <span class="ident">permute_binary_reverse</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">array</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">T</span>]) {
+    <span class="kw">let</span> <span class="ident">shift_amount</span> <span class="op">=</span> <span class="ident">array</span>.<span class="ident">len</span>().<span class="ident">leading_zeros</span>() <span class="op">+</span> <span class="number">1</span>;
+    <span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">array</span>.<span class="ident">len</span>() {
+        <span class="kw">let</span> <span class="ident">reversed</span> <span class="op">=</span> <span class="ident">index</span>.<span class="ident">reverse_bits</span>() <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">shift_amount</span>;
+        <span class="kw">if</span> <span class="ident">reversed</span> <span class="op">&gt;</span> <span class="ident">index</span> {
+            <span class="ident">array</span>.<span class="ident">swap</span>(<span class="ident">index</span>, <span class="ident">reversed</span>);
         }
     }
 }

@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["parabolic_interpolation","Finds the approximate minimum point of a function given three fixed points, using a parabola."]],"struct":[["CorrelationMatch","A structure prepared to perform correlation matches up to a given size."]]});
