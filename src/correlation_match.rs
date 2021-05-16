@@ -62,7 +62,7 @@ impl CorrelationMatch {
     /// the period of the signal is also returned as the second item in the tuple. This can be used
     /// to compute the fundamental frequency of the signal.
     ///
-    /// All arrays must be less than the maximum size given on `new`.
+    /// No array should exceed the maximum size given on `new`.
     pub fn compute(&mut self, a: &[Num], b: &[Num], w: &[Num]) -> (Num, Option<Num>) {
         assert!(a.len() <= self.max_size);
         assert!(b.len() <= a.len());

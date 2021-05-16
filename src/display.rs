@@ -83,7 +83,9 @@ impl DisplayBuffer {
     ///
     /// The `memory_decay` and `period_decay` parameters determine the decay coefficient of the
     /// memory buffer, and the interval average respectively:  
-    /// `average = coeff * new + (1. - coeff) * average;`  
+    /// ```none
+    /// average = coeff * new + (1. - coeff) * average;
+    /// ```
     /// Set to `1.0` to bypass smoothing.
     ///
     /// [`update_display`](Self::update_display) should be called separately to update the display buffer.
