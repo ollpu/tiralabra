@@ -11,7 +11,7 @@ Jos haluat kääntää demon itse, asenna ensin Rust ja Cargo-paketinhallinta: h
 
 Ubuntulla tai muilla Debian-pohjaisilla tulee myös asentaa ALSA-kirjaston kehitysotsakkeet, eli `sudo apt-get install libasound2-dev`.
 
-Aja sitten demo suorittamalla (grafiikkakirjastojen kääntämisessä kestää jonkin aikaa)
+Aja sitten demo kansiossa `examples/demo` suorittamalla (grafiikkakirjastojen kääntämisessä kestää jonkin aikaa)
 
 ```
 cargo run --release --example demo
@@ -19,7 +19,7 @@ cargo run --release --example demo
 
 [Demon käyttöohjeet](dokumentaatio/käyttöohje.md)
 
-Testit voidaan ajaa suorittamalla
+Testit voidaan ajaa suorittamalla (repositorion juuressa)
 
 ```
 cargo test --no-default-features

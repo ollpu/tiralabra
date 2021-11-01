@@ -1,0 +1,10 @@
+[package]
+name = "demo"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+tiralabra = { path = "../../" }
+tuix = { git = "https://github.com/geom3trik/tuix", branch = "experiment" }
+femtovg = { git = "https://github.com/femtovg/femtovg", branch = "master", default-features = false }
+cpal = { version = "0.13" }

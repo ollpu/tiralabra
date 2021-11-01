@@ -5,18 +5,9 @@ authors = ["Roope Salmi <rpsalmi@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-tuix = { git = "https://github.com/geom3trik/tuix", branch = "experiment", optional = true }
-femtovg = { git = "https://github.com/femtovg/femtovg", branch = "master", default-features = false, optional = true }
-cpal = { version = "0.13", optional = true }
 
 [dev-dependencies]
 rand = { version = "0.8", default-features = false, features = ["std", "small_rng"] }
 
 [features]
-gui = ["tuix", "femtovg", "cpal"]
-default = ["gui"]
-
-[[example]]
-name = "demo"
-required-features = ["gui"]
 
