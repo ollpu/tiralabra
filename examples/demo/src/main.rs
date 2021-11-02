@@ -15,13 +15,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         Ok(s) => s,
         Err(e) => {
             eprintln!(
-                "Mikrofonin avaaminen ei onnistunut: {:?}\nVoit silti käyttää testisignaalia!",
+                "Unable to open microphone: {:?}\nYou can still use the test signal!",
                 e
             );
             44100.
         }
     };
-    println!("Näytteenottotaajuus: {}", sample_rate);
+    println!("Sample rate: {}", sample_rate);
     let plot = Plot::new(consume_handle, sample_rate);
     let app = Application::new(move |state, window| {
         state.add_theme(style::themes::DEFAULT_THEME);
@@ -33,20 +33,20 @@ fn main() -> Result<(), Box<dyn Error>> {
         plot.build(state, window.entity(), |builder| {
             builder.set_width(Stretch(4.)).set_height(Stretch(1.))
         });
-        window.set_title("Tiralabra demo").set_inner_size(800, 600);
+        window.set_title("Correlation track demo").set_inner_size(800, 600);
     });
     app.run();
     Ok(())
 }
 fn err_fn(err: cpal::StreamError) {
-    eprintln!("Virhe äänilaitteen kanssa: {}", err);
+    eprintln!("Error with audio device: {}", err);
 }
 fn setup_audio(publish_handle: ring_buffer::Producer<f32>) -> Result<f32, Box<dyn Error>> {
     let host = cpal::default_host();
     let device = host
         .default_input_device()
-        .ok_or("Äänilaitetta ei löydetty")?;
-    eprintln!("Käytetään äänilaitetta: \"{}\"", device.name()?);
+        .ok_or("No audio device found")?;
+    eprintln!("Using audio device: \"{}\"", device.name()?);
     let config = device.default_input_config()?;
     let sample_format = config.sample_format();
     let config: cpal::StreamConfig = config.into();
@@ -350,7 +350,7 @@ impl Widget for Control {
     fn on_build(&mut self, state: &mut State, entity: Entity) -> Self::Ret {
         entity.set_element(state, "control");
         entity.set_layout_type(state, LayoutType::Column);
-        let (_, _, dropdown) = Dropdown::new("Äänilähde").build(state, entity, |b| {
+        let (_, _, dropdown) = Dropdown::new("Source").build(state, entity, |b| {
             b.set_height(Pixels(30.0)).set_width(Stretch(1.0))
         });
         let options = List::new().build(state, dropdown, |b| b);
@@ -360,7 +360,7 @@ impl Widget for Control {
                     .propagate(Propagation::All),
             )
             .build(state, options, |b| {
-                b.set_text("Mikrofoni")
+                b.set_text("Microphone")
                     .set_height(Pixels(30.0))
                     .set_child_left(Pixels(5.0))
             });
@@ -370,7 +370,7 @@ impl Widget for Control {
                     .propagate(Propagation::All),
             )
             .build(state, options, |b| {
-                b.set_text("Testi: Siniaalto")
+                b.set_text("Test: Sine wave")
                     .set_height(Pixels(30.0))
                     .set_child_left(Pixels(5.0))
             });
@@ -380,7 +380,7 @@ impl Widget for Control {
                     .propagate(Propagation::All),
             )
             .build(state, options, |b| {
-                b.set_text("Testi: Vaihtuva")
+                b.set_text("Test: Modulating")
                     .set_height(Pixels(30.0))
                     .set_child_left(Pixels(5.0))
             });
@@ -391,8 +391,8 @@ impl Widget for Control {
                 Event::new(PlotControlEvent::Stabilize(false)).propagate(Propagation::All),
             )
             .build(state, checkbox, |builder| builder);
-        Label::new("Vakauta").build(state, checkbox, |builder| builder);
-        Label::new("Näytön vaimenemisaika").build(state, entity, |builder| builder);
+        Label::new("Track").build(state, checkbox, |builder| builder);
+        Label::new("Display decay time").build(state, entity, |builder| builder);
         Slider::new()
             .with_min(0.)
             .with_max(2.)
@@ -403,7 +403,7 @@ impl Widget for Control {
                     .target(entity)
             })
             .build(state, entity, |builder| builder);
-        Label::new("Muistin vaimenemisaika").build(state, entity, |builder| builder);
+        Label::new("Memory decay time").build(state, entity, |builder| builder);
         Slider::new()
             .with_min(0.)
             .with_max(2.)
