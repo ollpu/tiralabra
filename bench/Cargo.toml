@@ -14,7 +14,3 @@ criterion = { version = "0.3", features = ["html_reports", "cargo_bench_support"
 [[bench]]
 name = "correlation_match_performance"
 harness = false
-
-[[bench]]
-name = "fft_performance"
-harness = false

@@ -7,11 +7,10 @@ pub use correlation_match::parabolic_interpolation::parabolic_interpolation_mini
 pub use correlation_match::CorrelationMatch;
 mod cross_correlation;
 pub use cross_correlation::CrossCorrelation;
-mod fft;
-pub use fft::Fft;
-pub mod math;
 pub mod ring_buffer;
 pub mod util;
+mod float;
+pub use float::Float;
 
 #[cfg(test)]
 mod test;

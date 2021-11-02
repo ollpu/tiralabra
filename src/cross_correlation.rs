@@ -1,28 +1,34 @@
-use crate::fft;
-use crate::math::*;
-use std::array::IntoIter;
+use num_complex::Complex;
+use num_traits::Zero;
+use rustfft::{Fft, FftPlanner};
+use std::{array::IntoIter, sync::Arc};
+
+use crate::Float;
 
 /// Computes cross correlation efficiently, using FFT.
 ///
 /// This structure is prepared to perform cross correlations up to a given maximum size.
-pub struct CrossCorrelation {
+pub struct CrossCorrelation<Num> {
     base_size: usize,
     fft_size: usize,
-    fft: fft::Fft,
-    buffer: Vec<Complex>,
+    forward_fft: Arc<dyn Fft<Num>>,
+    inverse_fft: Arc<dyn Fft<Num>>,
+    buffer: Vec<Complex<Num>>,
 }
 
-impl CrossCorrelation {
+impl<Num: Float> CrossCorrelation<Num> {
     /// Allocate and prepare a cross correlation. `max_size` is the maximum size
     /// of either of the input arrays.
     pub fn new(max_size: usize) -> Self {
         let base_size = max_size.next_power_of_two();
         let fft_size = base_size * 2;
+        let mut planner = FftPlanner::new();
         CrossCorrelation {
             base_size,
             fft_size,
-            fft: fft::Fft::new(fft_size),
-            buffer: vec![(0., 0.).into(); fft_size],
+            forward_fft: planner.plan_fft_forward(fft_size),
+            inverse_fft: planner.plan_fft_inverse(fft_size),
+            buffer: vec![Complex::zero(); fft_size],
         }
     }
 
@@ -38,7 +44,7 @@ impl CrossCorrelation {
         self.buffer[self.fft_size - b.len() + 1..]
             .iter()
             .chain(self.buffer[..a.len()].iter())
-            .map(|z| z.real)
+            .map(|z| z.re)
     }
 
     /// Compute cross correlation excluding partially overlapping positions.
@@ -47,7 +53,7 @@ impl CrossCorrelation {
     pub fn compute_truncated(&mut self, a: &[Num], b: &[Num]) -> impl Iterator<Item = Num> + '_ {
         assert!(a.len() >= b.len());
         self.compute_raw(a, b);
-        self.buffer[..a.len() - b.len() + 1].iter().map(|z| z.real)
+        self.buffer[..a.len() - b.len() + 1].iter().map(|z| z.re)
     }
 
     /// Performs the computation without extracting results from the `buffer`.
@@ -68,35 +74,39 @@ impl CrossCorrelation {
         for (zk, (ak, bk)) in self.buffer.iter_mut().zip(
             a.iter()
                 .cloned()
-                .chain(iter::repeat(0.))
-                .zip(b.iter().cloned().chain(iter::repeat(0.))),
+                .chain(iter::repeat(Num::v(0.)))
+                .zip(b.iter().cloned().chain(iter::repeat(Num::v(0.)))),
         ) {
-            *zk = (ak, bk).into();
+            *zk = Complex { re: ak, im: bk };
         }
 
-        self.fft.fft(&mut self.buffer);
+        self.forward_fft.process(&mut self.buffer);
 
         // Split buffer into left and right half because we need to iterate both at once.
         let (left, right) = self.buffer.split_at_mut(self.fft_size / 2);
         // a[0] = a[-0] and a[N/2] = a[-N/2] so they must be handled separately.
         for zw in IntoIter::new([&mut left[0], &mut right[0]]) {
-            let Complex { real: aw, imag: bw } = *zw;
+            let Complex { re: aw, im: bw } = *zw;
             *zw = Complex {
-                real: aw * bw,
-                imag: 0.,
+                re: aw * bw,
+                im: Num::v(0.),
             };
         }
         for (zw, zmw) in left[1..].iter_mut().zip(right[1..].iter_mut().rev()) {
             // zw = z[w], zmw = z[-w]
             // Solve a[w] and b[w] first
-            let aw = (*zw + zmw.conj()) / 2.;
-            let bw = (zmw.conj() - *zw) * IMAG_UNIT / 2.;
+            let aw = (*zw + zmw.conj()) / Num::v(2.);
+            let bw = (zmw.conj() - *zw) * Complex::i() / Num::v(2.);
             // Then store a[w] * conj(b[w]) and conj(a[w] * conj(b[w]))
             let res = aw * bw.conj();
             *zw = res;
             *zmw = res.conj();
         }
 
-        self.fft.ifft(&mut self.buffer);
+        self.inverse_fft.process(&mut self.buffer);
+
+        for v in self.buffer.iter_mut() {
+            *v /= Num::v(self.fft_size as f64);
+        }
     }
 }

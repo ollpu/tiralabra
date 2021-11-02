@@ -137,7 +137,7 @@ struct Plot {
     consume_handle: ring_buffer::Consumer<f32>,
     sample_rate: f32,
     test_signal_generator: TestSignal,
-    display: DisplayBuffer,
+    display: DisplayBuffer<f32>,
     stabilize_enabled: bool,
     show_memory: bool,
     display_decay: f32,

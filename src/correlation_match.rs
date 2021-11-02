@@ -1,8 +1,8 @@
 pub mod parabolic_interpolation;
 use parabolic_interpolation::parabolic_interpolation_minimum;
 
+use crate::Float;
 use crate::cross_correlation::CrossCorrelation;
-use crate::math::*;
 use crate::util::IterWindows;
 
 /// Finds the closest match of a shorter piece of audio from a larger piece of audio.
@@ -34,26 +34,26 @@ use crate::util::IterWindows;
 ///
 /// nähdään, että se voidaan laskea kahtena ristikorrelaationa (summat x:n yli muotoa
 /// `f(x+t) * g(x)`) ja yhtenä suorana tulona (summa x:n yli muotoa `f(x) * g(x)`).
-pub struct CorrelationMatch {
+pub struct CorrelationMatch<Num> {
     max_size: usize,
-    cross_correlation: CrossCorrelation,
+    cross_correlation: CrossCorrelation<Num>,
     f_buffer: Vec<Num>,
     g_buffer: Vec<Num>,
     result_buffer: Vec<Num>,
     minima: Vec<(Num, Num)>,
 }
 
-impl CorrelationMatch {
+impl<Num: Float> CorrelationMatch<Num> {
     /// Allocate and prepare a correlation match algorithm. `max_size` is
     /// the maximum size of any of the input arrays.
     pub fn new(max_size: usize) -> Self {
         CorrelationMatch {
             max_size,
             cross_correlation: CrossCorrelation::new(max_size),
-            f_buffer: vec![0.; max_size],
-            g_buffer: vec![0.; max_size],
-            result_buffer: vec![0.; max_size],
-            minima: vec![(0., 0.); max_size],
+            f_buffer: vec![Num::zero(); max_size],
+            g_buffer: vec![Num::zero(); max_size],
+            result_buffer: vec![Num::zero(); max_size],
+            minima: vec![(Num::zero(), Num::zero()); max_size],
         }
     }
 
@@ -75,10 +75,10 @@ impl CorrelationMatch {
     }
 
     fn zero_buffers(&mut self, a_len: usize, b_len: usize) {
-        self.f_buffer.resize(a_len, 0.);
-        self.g_buffer.resize(b_len, 0.);
+        self.f_buffer.resize(a_len, Num::zero());
+        self.g_buffer.resize(b_len, Num::zero());
         self.result_buffer.clear();
-        self.result_buffer.resize(a_len - b_len + 1, 0.);
+        self.result_buffer.resize(a_len - b_len + 1, Num::zero());
         self.minima.clear();
     }
 
@@ -114,7 +114,7 @@ impl CorrelationMatch {
         for (result, cross_correlation_result) in
             self.result_buffer.iter_mut().zip(cross_correlation_result)
         {
-            *result -= 2. * cross_correlation_result;
+            *result -= Num::v(2.) * cross_correlation_result;
         }
     }
 
@@ -127,21 +127,21 @@ impl CorrelationMatch {
     }
 
     fn find_minimum_and_period(&mut self) -> (Num, Option<Num>) {
-        let mut max_value = 1.;
+        let mut max_value = Num::one();
         for value in &self.result_buffer {
             max_value = value.max(max_value);
         }
-        let mut min_position = 0.;
+        let mut min_position = Num::zero();
         let mut min_value = self.result_buffer[0];
         let end = self.result_buffer.len() - 1;
         if self.result_buffer[end] < min_value {
-            min_position = end as Num;
+            min_position = Num::from_usize(end).unwrap();
             min_value = self.result_buffer[end];
         }
         for (index, [a, b, c]) in IterWindows::from(self.result_buffer.iter().copied()).enumerate()
         {
             if let Some((x, y)) = parabolic_interpolation_minimum(a, b, c) {
-                let position = index as Num + x;
+                let position = Num::from_usize(index).unwrap() + x;
                 self.minima.push((position, y));
                 if y < min_value {
                     min_position = position;
@@ -149,17 +149,17 @@ impl CorrelationMatch {
                 }
             }
         }
-        let threshold = min_value + (max_value - min_value) * 0.1;
+        let threshold = min_value + (max_value - min_value) * Num::v(0.1);
         self.minima.retain(|(_x, y)| *y < threshold);
         let mut valid_intervals = 0;
         for [(a_position, _), (b_position, _)] in IterWindows::from(self.minima.iter().copied()) {
-            if b_position - a_position > 1.5 {
+            if b_position - a_position > Num::v(1.5) {
                 valid_intervals += 1;
             }
         }
         let interval = if valid_intervals >= 2 {
             let total = self.minima.last().unwrap().0 - self.minima.first().unwrap().0;
-            Some(total / valid_intervals as Num)
+            Some(total / Num::from_usize(valid_intervals).unwrap())
         } else {
             None
         };

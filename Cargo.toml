@@ -5,6 +5,9 @@ authors = ["Roope Salmi <rpsalmi@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+num-complex = "0.4"
+num-traits = "0.2"
+rustfft = "6"
 
 [dev-dependencies]
 rand = { version = "0.8", default-features = false, features = ["std", "small_rng"] }

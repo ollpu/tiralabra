@@ -3,10 +3,11 @@ mod test_parabolic_interpolation;
 use crate::correlation_match::CorrelationMatch;
 
 use super::util::*;
-use crate::math::*;
 
+use std::f32::consts::PI;
 use rand::prelude::*;
 use rand::rngs::SmallRng;
+
 
 #[test]
 fn simple_correlation_match() {
@@ -15,7 +16,7 @@ fn simple_correlation_match() {
     let b = [1., 2.];
     let w = [1., 1.];
     let (offset, _) = matcher.compute(&a, &b, &w);
-    let correct = 3.;
+    let correct = 3f32;
     assert!((offset - correct).abs() < 0.5);
 }
 
