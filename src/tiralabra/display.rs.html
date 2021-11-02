@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/display.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>display.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../tiralabra/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;display.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>display.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../tiralabra/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -158,17 +155,19 @@
 <span id="155">155</span>
 <span id="156">156</span>
 <span id="157">157</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! Wrapper for [`CorrelationMatch`], providing functionality for displaying a waveform.</span>
+<span id="158">158</span>
+<span id="159">159</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Wrapper for [`CorrelationMatch`], providing functionality for displaying a waveform.</span>
 
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">correlation_match</span>::<span class="ident">CorrelationMatch</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">math</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">util</span>::{<span class="ident">shift_left</span>, <span class="ident">shift_left_fill</span>, <span class="ident">shift_right</span>, <span class="ident">shift_right_fill</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Float</span>;
+
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::correlation_match::CorrelationMatch</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::util</span>::{<span class="ident">shift_left</span>, <span class="ident">shift_left_fill</span>, <span class="ident">shift_right</span>, <span class="ident">shift_right_fill</span>};
 
 <span class="doccomment">/// Stores a prepared [`CorrelationMatch`] and buffers for display and memory.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DisplayBuffer</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DisplayBuffer</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span> {
     <span class="ident">size</span>: <span class="ident">usize</span>,
-    <span class="ident">correlation_matcher</span>: <span class="ident">CorrelationMatch</span>,
+    <span class="ident">correlation_matcher</span>: <span class="ident">CorrelationMatch</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span>,
     <span class="ident">buffer</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span>,
     <span class="ident">display</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span>,
     <span class="ident">memory</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span>,
@@ -178,7 +177,7 @@
     <span class="ident">average_period</span>: <span class="ident">Num</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">DisplayBuffer</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Num</span>: <span class="ident">Float</span><span class="op">&gt;</span> <span class="ident">DisplayBuffer</span><span class="op">&lt;</span><span class="ident">Num</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Construct a new [`DisplayBuffer`] with given input buffer size and display</span>
     <span class="doccomment">/// buffer size.</span>
     <span class="doccomment">///</span>
@@ -187,22 +186,23 @@
     <span class="doccomment">/// The weight function is populated with a Hann window, so the center of the display is</span>
     <span class="doccomment">/// prioritized when matching.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">input_size</span>: <span class="ident">usize</span>, <span class="ident">display_size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">input_size</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">display_size</span>);
+        <span class="macro">assert!</span>(<span class="ident">input_size</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">display_size</span>);
+        <span class="kw">let</span> <span class="ident">display_size_f</span> <span class="op">=</span> <span class="ident">Num::from_usize</span>(<span class="ident">display_size</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">weight</span> <span class="op">=</span> (<span class="number">0</span>..<span class="ident">display_size</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">index</span><span class="op">|</span> <span class="ident">index</span> <span class="kw">as</span> <span class="ident">isize</span> <span class="op">-</span> (<span class="ident">display_size</span> <span class="op">/</span> <span class="number">2</span>) <span class="kw">as</span> <span class="ident">isize</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">offset</span><span class="op">|</span> <span class="ident">offset</span> <span class="kw">as</span> <span class="ident">f32</span> <span class="op">/</span> <span class="ident">display_size</span> <span class="kw">as</span> <span class="ident">f32</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="number">1.</span> <span class="op">+</span> (<span class="number">2.</span> <span class="op">*</span> <span class="ident">PI</span> <span class="op">*</span> <span class="ident">x</span>).<span class="ident">cos</span>())
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">offset</span><span class="op">|</span> <span class="ident">Num::from_isize</span>(<span class="ident">offset</span>).<span class="ident">unwrap</span>() <span class="op">/</span> <span class="ident">display_size_f</span>)
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span>: <span class="ident">Num</span><span class="op">|</span> <span class="ident">Num::v</span>(<span class="number">1.</span>) <span class="op">+</span> (<span class="ident">Num::v</span>(<span class="number">2.</span>) <span class="op">*</span> <span class="ident">Num::PI</span>() <span class="op">*</span> <span class="ident">x</span>).<span class="ident">cos</span>())
             .<span class="ident">collect</span>();
         <span class="ident">DisplayBuffer</span> {
             <span class="ident">size</span>: <span class="ident">display_size</span>,
-            <span class="ident">correlation_matcher</span>: <span class="ident">CorrelationMatch</span>::<span class="ident">new</span>(<span class="ident">input_size</span>),
-            <span class="ident">buffer</span>: <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0.</span>; <span class="ident">input_size</span>],
-            <span class="ident">display</span>: <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0.</span>; <span class="ident">display_size</span>],
-            <span class="ident">memory</span>: <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0.</span>; <span class="ident">display_size</span>],
+            <span class="ident">correlation_matcher</span>: <span class="ident">CorrelationMatch::new</span>(<span class="ident">input_size</span>),
+            <span class="ident">buffer</span>: <span class="macro">vec!</span>[<span class="ident">Num::zero</span>(); <span class="ident">input_size</span>],
+            <span class="ident">display</span>: <span class="macro">vec!</span>[<span class="ident">Num::zero</span>(); <span class="ident">display_size</span>],
+            <span class="ident">memory</span>: <span class="macro">vec!</span>[<span class="ident">Num::zero</span>(); <span class="ident">display_size</span>],
             <span class="ident">weight</span>,
             <span class="ident">offset</span>: <span class="number">0</span>,
-            <span class="ident">residual</span>: <span class="number">0.</span>,
-            <span class="ident">average_period</span>: <span class="number">0.</span>,
+            <span class="ident">residual</span>: <span class="ident">Num::zero</span>(),
+            <span class="ident">average_period</span>: <span class="ident">Num::zero</span>(),
         }
     }
 
@@ -213,14 +213,14 @@
         <span class="kw">match</span> <span class="ident">amount</span> {
             <span class="ident">amount</span> <span class="kw">if</span> <span class="ident">amount</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">amount</span> <span class="op">=</span> <span class="ident">amount</span> <span class="kw">as</span> <span class="ident">usize</span>;
-                <span class="ident">shift_right_fill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buffer</span>, <span class="ident">amount</span>, <span class="number">0.</span>);
+                <span class="ident">shift_right_fill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buffer</span>, <span class="ident">amount</span>, <span class="ident">Num::zero</span>());
                 <span class="kw">let</span> <span class="ident">replace_range</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buffer</span>[<span class="self">self</span>.<span class="ident">offset</span>..][..<span class="ident">amount</span>];
                 <span class="ident">shift_right</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">display</span>, <span class="ident">replace_range</span>);
                 <span class="ident">shift_right</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">memory</span>, <span class="ident">replace_range</span>);
             }
             <span class="ident">amount</span> <span class="kw">if</span> <span class="ident">amount</span> <span class="op">&lt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">amount</span> <span class="op">=</span> <span class="op">-</span><span class="ident">amount</span> <span class="kw">as</span> <span class="ident">usize</span>;
-                <span class="ident">shift_left_fill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buffer</span>, <span class="ident">amount</span>, <span class="number">0.</span>);
+                <span class="ident">shift_left_fill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buffer</span>, <span class="ident">amount</span>, <span class="ident">Num::zero</span>());
                 <span class="kw">let</span> <span class="ident">replace_range</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buffer</span>[<span class="self">self</span>.<span class="ident">offset</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">size</span> <span class="op">-</span> <span class="ident">amount</span>..][..<span class="ident">amount</span>];
                 <span class="ident">shift_left</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">display</span>, <span class="ident">replace_range</span>);
                 <span class="ident">shift_left</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">memory</span>, <span class="ident">replace_range</span>);
@@ -256,18 +256,18 @@
                 <span class="self">self</span>.<span class="ident">correlation_matcher</span>
                     .<span class="ident">compute</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buffer</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">memory</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">weight</span>);
             <span class="kw">let</span> <span class="ident">rounded</span> <span class="op">=</span> <span class="ident">offset</span>.<span class="ident">round</span>();
-            <span class="self">self</span>.<span class="ident">offset</span> <span class="op">=</span> <span class="ident">rounded</span> <span class="kw">as</span> <span class="ident">usize</span>;
+            <span class="self">self</span>.<span class="ident">offset</span> <span class="op">=</span> <span class="ident">rounded</span>.<span class="ident">as_</span>() <span class="kw">as</span> <span class="ident">usize</span>;
             <span class="self">self</span>.<span class="ident">residual</span> <span class="op">+</span><span class="op">=</span> <span class="ident">offset</span> <span class="op">-</span> <span class="ident">rounded</span>;
-            <span class="self">self</span>.<span class="ident">offset</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">i64</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">residual</span> <span class="kw">as</span> <span class="ident">i64</span>)
+            <span class="self">self</span>.<span class="ident">offset</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">i64</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">residual</span>.<span class="ident">as_</span>())
                 .<span class="ident">clamp</span>(<span class="number">0</span>, <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">i64</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">usize</span>;
             <span class="self">self</span>.<span class="ident">residual</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">residual</span>.<span class="ident">fract</span>();
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">interval</span>) <span class="op">=</span> <span class="ident">interval</span> {
                 <span class="self">self</span>.<span class="ident">average_period</span> <span class="op">=</span>
-                    <span class="ident">period_decay</span> <span class="op">*</span> <span class="ident">interval</span> <span class="op">+</span> (<span class="number">1.</span> <span class="op">-</span> <span class="ident">period_decay</span>) <span class="op">*</span> <span class="self">self</span>.<span class="ident">average_period</span>;
+                    <span class="ident">period_decay</span> <span class="op">*</span> <span class="ident">interval</span> <span class="op">+</span> (<span class="ident">Num::v</span>(<span class="number">1.</span>) <span class="op">-</span> <span class="ident">period_decay</span>) <span class="op">*</span> <span class="self">self</span>.<span class="ident">average_period</span>;
             }
         }
         <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">iter_mut</span>().<span class="ident">enumerate</span>() {
-            <span class="kw-2">*</span><span class="ident">item</span> <span class="op">=</span> <span class="ident">memory_decay</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">buffer</span>[<span class="ident">index</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">offset</span>] <span class="op">+</span> (<span class="number">1.</span> <span class="op">-</span> <span class="ident">memory_decay</span>) <span class="op">*</span> <span class="kw-2">*</span><span class="ident">item</span>;
+            <span class="kw-2">*</span><span class="ident">item</span> <span class="op">=</span> <span class="ident">memory_decay</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">buffer</span>[<span class="ident">index</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">offset</span>] <span class="op">+</span> (<span class="ident">Num::v</span>(<span class="number">1.</span>) <span class="op">-</span> <span class="ident">memory_decay</span>) <span class="op">*</span> <span class="kw-2">*</span><span class="ident">item</span>;
         }
     }
 
@@ -277,7 +277,7 @@
     <span class="doccomment">/// there is no new data, to animate smoothly.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_display</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">display_decay</span>: <span class="ident">Num</span>) {
         <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">display</span>.<span class="ident">iter_mut</span>().<span class="ident">enumerate</span>() {
-            <span class="kw-2">*</span><span class="ident">item</span> <span class="op">=</span> <span class="ident">display_decay</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">buffer</span>[<span class="ident">index</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">offset</span>] <span class="op">+</span> (<span class="number">1.</span> <span class="op">-</span> <span class="ident">display_decay</span>) <span class="op">*</span> <span class="kw-2">*</span><span class="ident">item</span>;
+            <span class="kw-2">*</span><span class="ident">item</span> <span class="op">=</span> <span class="ident">display_decay</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">buffer</span>[<span class="ident">index</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">offset</span>] <span class="op">+</span> (<span class="ident">Num::v</span>(<span class="number">1.</span>) <span class="op">-</span> <span class="ident">display_decay</span>) <span class="op">*</span> <span class="kw-2">*</span><span class="ident">item</span>;
         }
     }
 
@@ -316,6 +316,7 @@
         (<span class="self">self</span>.<span class="ident">offset</span>, <span class="self">self</span>.<span class="ident">residual</span>)
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="tiralabra" data-search-js="../../search-index.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="tiralabra" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>
