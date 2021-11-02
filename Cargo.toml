@@ -1,5 +1,5 @@
 [package]
-name = "tiralabra"
+name = "correlation-track"
 version = "0.1.0"
 authors = ["Roope Salmi <rpsalmi@gmail.com>"]
 edition = "2018"

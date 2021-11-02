@@ -6,7 +6,7 @@ use tuix::*;
 mod test_signal;
 use test_signal::TestSignal;
 
-use tiralabra::ring_buffer;
+use correlation_track::ring_buffer;
 
 static THEME: &'static str = include_str!("theme.css");
 fn main() -> Result<(), Box<dyn Error>> {
@@ -132,7 +132,7 @@ impl PlotIngest {
     }
 }
 
-use tiralabra::DisplayBuffer;
+use correlation_track::DisplayBuffer;
 struct Plot {
     consume_handle: ring_buffer::Consumer<f32>,
     sample_rate: f32,

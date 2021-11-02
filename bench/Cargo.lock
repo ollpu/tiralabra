@@ -76,6 +76,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "correlation-track"
+version = "0.1.0"
+dependencies = [
+ "num-complex",
+ "num-traits",
+ "rustfft",
+]
+
+[[package]]
 name = "criterion"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -570,9 +579,9 @@ checksum = "a3ff2f71c82567c565ba4b3009a9350a96a7269eaa4001ebedae926230bc2254"
 name = "suorituskyky"
 version = "0.1.0"
 dependencies = [
+ "correlation-track",
  "criterion",
  "rand",
- "tiralabra",
 ]
 
 [[package]]
@@ -603,15 +612,6 @@ checksum = "be4d6b5f19ff7664e8c98d03e2139cb510db9b0a60b55f8e8709b689d939b6bc"
 dependencies = [
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "tiralabra"
-version = "0.1.0"
-dependencies = [
- "num-complex",
- "num-traits",
- "rustfft",
 ]
 
 [[package]]

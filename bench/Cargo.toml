@@ -5,7 +5,7 @@ authors = ["Roope Salmi <rpsalmi@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-tiralabra = { path = "..", default-features = false }
+correlation-track = { path = "..", default-features = false }
 
 [dev-dependencies]
 rand = { version = "0.8", default-features = false, features = ["std", "small_rng"] }
