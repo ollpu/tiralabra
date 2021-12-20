@@ -5,14 +5,14 @@ pushed and read at once.</p>
 wrap around to the beginning if they reach the end. That is why it is called
 a “ring”.</p>
 </div></details><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="struct" href="struct.Consumer.html" title="correlation_track::ring_buffer::Consumer struct">Consumer</a></div><div class="item-right docblock-short"><p>The Consumer party of a ring buffer. Can only pop data off the queue.</p>
-</div><div class="item-left module-item"><a class="struct" href="struct.Producer.html" title="correlation_track::ring_buffer::Producer struct">Producer</a></div><div class="item-right docblock-short"><p>The Producer party of a ring buffer. Can only push data to the queue.</p>
-</div></div><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="trait" href="trait.Item.html" title="correlation_track::ring_buffer::Item trait">Item</a></div><div class="item-right docblock-short"><p>Defines the interface that an item stored in the queue must implement. Only very simple types,
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Consumer.html" title="correlation_track::ring_buffer::Consumer struct">Consumer</a></div><div class="item-right docblock-short"><p>The Consumer party of a ring buffer. Can only pop data off the queue.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Producer.html" title="correlation_track::ring_buffer::Producer struct">Producer</a></div><div class="item-right docblock-short"><p>The Producer party of a ring buffer. Can only push data to the queue.</p>
+</div></div></div><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Item.html" title="correlation_track::ring_buffer::Item trait">Item</a></div><div class="item-right docblock-short"><p>Defines the interface that an item stored in the queue must implement. Only very simple types,
 such as floating point numbers or small <code>struct</code>s that implement Copy are permitted.</p>
-</div></div><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="fn" href="fn.with_capacity.html" title="correlation_track::ring_buffer::with_capacity fn">with_capacity</a></div><div class="item-right docblock-short"><p>Construct a ring buffer with a given capacity, and return <code>(producer, consumer)</code>.
+</div></div></div><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.with_capacity.html" title="correlation_track::ring_buffer::with_capacity fn">with_capacity</a></div><div class="item-right docblock-short"><p>Construct a ring buffer with a given capacity, and return <code>(producer, consumer)</code>.
 The producer can then be sent to another thread for example.</p>
-</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="correlation_track" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+</div></div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="correlation_track" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script>
 </body></html>
