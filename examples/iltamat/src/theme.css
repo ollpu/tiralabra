@@ -1,0 +1,38 @@
+
+control {
+  border-color: #383838;
+  child-space: 10px;
+  child-between: 12px;
+  border-width: 2px;
+  left: -2px;
+  top: -2px;
+  bottom: -2px;
+}
+
+label {
+  height: 12px;
+  color: #ffffff;
+}
+
+.check {
+  width: 1s;
+  child-between: 5px;
+}
+.check label {
+  top: 1s;
+  bottom: 1s;
+  width: 1s;
+}
+
+
+slider {
+  top: 5px;
+}
+
+slider>.track {
+  left: 2px;
+}
+slider>.track>.active {
+  left: -2px;
+}
+
