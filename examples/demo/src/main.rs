@@ -27,13 +27,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         state.add_theme(style::themes::DEFAULT_THEME);
         state.add_theme(THEME);
         window.set_layout_type(state, LayoutType::Row);
+        window.set_background_color(state, tuix::Color::rgb(12, 12, 12));
         Control::default().build(state, window.entity(), |builder| {
-            builder.set_width(Stretch(1.)).set_min_width(Pixels(200.))
+            builder.set_width(Stretch(0.)).set_min_width(Pixels(140.))
         });
         plot.build(state, window.entity(), |builder| {
             builder.set_width(Stretch(4.)).set_height(Stretch(1.))
         });
-        window.set_title("Correlation track demo").set_inner_size(800, 600);
+        window.set_title("Aaltomuoto").set_inner_size(800, 600);
     });
     app.run();
     Ok(())
@@ -241,22 +242,22 @@ impl Widget for Plot {
         let frequency = self.sample_rate / interval;
 
         // Draw offset indicator
-        canvas.clear_rect(
-            (x + 0.4 * w) as u32,
-            (y + h - 40.) as u32,
-            (0.2 * w) as u32,
-            15,
-            Color::rgb(70, 70, 70),
-        );
-        let pos = offset as f32 / N as f32;
-        let span = M as f32 / N as f32;
-        canvas.clear_rect(
-            (x + (0.4 + 0.2 * pos) * w) as u32,
-            (y + h - 40.) as u32,
-            (0.2 * span * w) as u32,
-            15,
-            Color::rgb(90, 90, 90),
-        );
+        // canvas.clear_rect(
+        //     (x + 0.4 * w) as u32,
+        //     (y + h - 40.) as u32,
+        //     (0.2 * w) as u32,
+        //     15,
+        //     Color::rgb(70, 70, 70),
+        // );
+        // let pos = offset as f32 / N as f32;
+        // let span = M as f32 / N as f32;
+        // canvas.clear_rect(
+        //     (x + (0.4 + 0.2 * pos) * w) as u32,
+        //     (y + h - 40.) as u32,
+        //     (0.2 * span * w) as u32,
+        //     15,
+        //     Color::rgb(90, 90, 90),
+        // );
         // Draw frequency
         if self.stabilize_enabled {
             let mut paint = femtovg::Paint::default();
@@ -294,7 +295,9 @@ impl Widget for Plot {
         for (x, y) in points {
             path.line_to(x, y);
         }
-        canvas.stroke_path(&mut path, Paint::color(Color::rgb(255, 255, 0)));
+        let mut paint = Paint::color(Color::rgb(255, 255, 255));
+        paint.set_line_width(2.);
+        canvas.stroke_path(&mut path, paint);
     }
 
     fn on_event(&mut self, _state: &mut State, _entity: Entity, event: &mut Event) {
@@ -350,49 +353,49 @@ impl Widget for Control {
     fn on_build(&mut self, state: &mut State, entity: Entity) -> Self::Ret {
         entity.set_element(state, "control");
         entity.set_layout_type(state, LayoutType::Column);
-        let (_, _, dropdown) = Dropdown::new("Source").build(state, entity, |b| {
-            b.set_height(Pixels(30.0)).set_width(Stretch(1.0))
-        });
-        let options = List::new().build(state, dropdown, |b| b);
-        CheckButton::new(true)
-            .on_checked(
-                Event::new(PlotControlEvent::Source(AudioSource::Microphone))
-                    .propagate(Propagation::All),
-            )
-            .build(state, options, |b| {
-                b.set_text("Microphone")
-                    .set_height(Pixels(30.0))
-                    .set_child_left(Pixels(5.0))
-            });
-        CheckButton::new(false)
-            .on_checked(
-                Event::new(PlotControlEvent::Source(AudioSource::TestSine))
-                    .propagate(Propagation::All),
-            )
-            .build(state, options, |b| {
-                b.set_text("Test: Sine wave")
-                    .set_height(Pixels(30.0))
-                    .set_child_left(Pixels(5.0))
-            });
-        CheckButton::new(false)
-            .on_checked(
-                Event::new(PlotControlEvent::Source(AudioSource::TestModulating))
-                    .propagate(Propagation::All),
-            )
-            .build(state, options, |b| {
-                b.set_text("Test: Modulating")
-                    .set_height(Pixels(30.0))
-                    .set_child_left(Pixels(5.0))
-            });
-        let checkbox = Row::new().build(state, entity, |builder| builder.class("check"));
-        Checkbox::new(true)
-            .on_checked(Event::new(PlotControlEvent::Stabilize(true)).propagate(Propagation::All))
-            .on_unchecked(
-                Event::new(PlotControlEvent::Stabilize(false)).propagate(Propagation::All),
-            )
-            .build(state, checkbox, |builder| builder);
-        Label::new("Track").build(state, checkbox, |builder| builder);
-        Label::new("Display decay time").build(state, entity, |builder| builder);
+        // let (_, _, dropdown) = Dropdown::new("Source").build(state, entity, |b| {
+        //     b.set_height(Pixels(30.0)).set_width(Stretch(1.0))
+        // });
+        // let options = List::new().build(state, dropdown, |b| b);
+        // CheckButton::new(true)
+        //     .on_checked(
+        //         Event::new(PlotControlEvent::Source(AudioSource::Microphone))
+        //             .propagate(Propagation::All),
+        //     )
+        //     .build(state, options, |b| {
+        //         b.set_text("Microphone")
+        //             .set_height(Pixels(30.0))
+        //             .set_child_left(Pixels(5.0))
+        //     });
+        // CheckButton::new(false)
+        //     .on_checked(
+        //         Event::new(PlotControlEvent::Source(AudioSource::TestSine))
+        //             .propagate(Propagation::All),
+        //     )
+        //     .build(state, options, |b| {
+        //         b.set_text("Test: Sine wave")
+        //             .set_height(Pixels(30.0))
+        //             .set_child_left(Pixels(5.0))
+        //     });
+        // CheckButton::new(false)
+        //     .on_checked(
+        //         Event::new(PlotControlEvent::Source(AudioSource::TestModulating))
+        //             .propagate(Propagation::All),
+        //     )
+        //     .build(state, options, |b| {
+        //         b.set_text("Test: Modulating")
+        //             .set_height(Pixels(30.0))
+        //             .set_child_left(Pixels(5.0))
+        //     });
+        // let checkbox = Row::new().build(state, entity, |builder| builder.class("check"));
+        // Checkbox::new(true)
+        //     .on_checked(Event::new(PlotControlEvent::Stabilize(true)).propagate(Propagation::All))
+        //     .on_unchecked(
+        //         Event::new(PlotControlEvent::Stabilize(false)).propagate(Propagation::All),
+        //     )
+        //     .build(state, checkbox, |builder| builder);
+        // Label::new("Track").build(state, checkbox, |builder| builder);
+        Label::new("Näytön tasoitus").build(state, entity, |builder| builder);
         Slider::new()
             .with_min(0.)
             .with_max(2.)
@@ -403,7 +406,7 @@ impl Widget for Control {
                     .target(entity)
             })
             .build(state, entity, |builder| builder);
-        Label::new("Memory decay time").build(state, entity, |builder| builder);
+        Label::new("Muistin tasoitus").build(state, entity, |builder| builder);
         Slider::new()
             .with_min(0.)
             .with_max(2.)

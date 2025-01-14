@@ -32,7 +32,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         window.set_layout_type(state, LayoutType::Row);
         window.set_background_color(state, tuix::Color::rgb(12, 12, 12));
         Control::default().build(state, window.entity(), |builder| {
-            builder.set_width(Stretch(1.)).set_min_width(Pixels(200.))
+            builder.set_width(Stretch(0.)).set_min_width(Pixels(140.))
         });
         plot.build(state, window.entity(), |builder| {
             builder.set_width(Stretch(4.)).set_height(Stretch(1.))
@@ -242,7 +242,7 @@ impl Widget for Plot {
                         let w = f / 44100. * N as f32;
                         let p = (w as isize).clamp(0, (N / 2) as isize);
                         let radius = 10;
-                        let mut result = 0.0f32;
+                        let mut result = 0.;
                         for iw in p - radius..=p + radius + 1 {
                             if iw < 0 || iw > (N / 2) as isize {
                                 continue;
@@ -267,6 +267,7 @@ impl Widget for Plot {
                             result += lanczos * value;
                             // result += sinc * window * value;
                         }
+                        //let value = 20. * result.norm().log10();
                         if !result.is_finite() {
                             *res = -250.;
                         } else {
@@ -474,7 +475,7 @@ impl Widget for Control {
         //     )
         //     .build(state, checkbox, |builder| builder);
         // Label::new("Track").build(state, checkbox, |builder| builder);
-        Label::new("Tasoitusaika").build(state, entity, |builder| builder);
+        Label::new("Näytön tasoitus").build(state, entity, |builder| builder);
         Slider::new()
             .with_min(0.)
             .with_max(2.)
