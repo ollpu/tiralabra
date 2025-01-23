@@ -34,9 +34,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         Control::default().build(state, window.entity(), |builder| {
             builder.set_width(Stretch(0.)).set_min_width(Pixels(140.))
         });
-        plot.build(state, window.entity(), |builder| {
+        let ent = plot.build(state, window.entity(), |builder| {
             builder.set_width(Stretch(4.)).set_height(Stretch(1.))
         });
+        ent.set_focus(state, true);
         window
             .set_title("Spektri")
             .set_inner_size(800, 600);
@@ -153,6 +154,7 @@ struct Plot {
     memory_decay: f32,
     audio_source: AudioSource,
     scroll_amount: i32,
+    freeze: bool,
 }
 
 fn decay_time_to_factor(time: f32) -> f32 {
@@ -178,6 +180,7 @@ impl Plot {
             memory_decay: decay_time_to_factor(0.8),
             audio_source: AudioSource::Microphone,
             scroll_amount: 0,
+            freeze: false,
         }
     }
 }
@@ -218,6 +221,7 @@ impl Widget for Plot {
                     // need buffers: Complex[N/2], f32[N]
                     // -> fft_complex, ff_real
                     // copy self.display buffer to fft scratch
+                    if self.freeze { continue; }
                     self.fft_real.copy_from_slice(self.display.get_buffer_mut());
                     // Apply Hann window
                     for (i, val) in self.fft_real.iter_mut().enumerate() {
@@ -229,6 +233,7 @@ impl Widget for Plot {
                         .unwrap();
                     // convert back to real
                     // interpolate on log scale at the same time??
+                    let Fs = self.sample_rate;
                     for (i, res) in self.fft_real.iter_mut().enumerate() {
                         // i in [0, N[
                         // x in [0, 1[
@@ -239,9 +244,9 @@ impl Widget for Plot {
                         // b = 1k
                         let x = i as f32 / N as f32;
                         let f = 40. * 500f32.powf(x);
-                        let w = f / 44100. * N as f32;
+                        let w = f / Fs * N as f32;
                         let p = (w as isize).clamp(0, (N / 2) as isize);
-                        let radius = 10;
+                        let radius = 5;
                         let mut result = 0.;
                         for iw in p - radius..=p + radius + 1 {
                             if iw < 0 || iw > (N / 2) as isize {
@@ -308,9 +313,11 @@ impl Widget for Plot {
                 }
             }
         }
-        self.display.update_display(self.display_decay);
-        for (src, trg) in self.fft_real.iter().zip(self.fft_display.iter_mut()) {
-            *trg = *src * self.display_decay + *trg * (1. - self.display_decay);
+        if !self.freeze {
+            self.display.update_display(self.display_decay);
+            for (src, trg) in self.fft_real.iter().zip(self.fft_display.iter_mut()) {
+                *trg = *src * self.display_decay + *trg * (1. - self.display_decay);
+            }
         }
         let (offset, residual) = self.display.get_offset();
         let interval = self.display.get_period();
@@ -358,6 +365,36 @@ impl Widget for Plot {
         //     }
         //     canvas.stroke_path(&mut path, Paint::color(Color::rgb(12, 170, 255)));
         // }
+        // Draw frequency lines
+        let mut path = Path::new();
+        let mut path_strong = Path::new();
+        for f in [50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000] {
+            let fx = (f as f32 / 40.).log(500.);
+            let px = w * fx;
+            let ax = (x + px - 0.5).round() + 0.5;
+            path.move_to(ax, y);
+            path.line_to(ax, y + h);
+            if f == 100 || f == 1000 || f == 10000 {
+                path_strong.move_to(ax, y);
+                path_strong.line_to(ax, y + h);
+                let mut paint = femtovg::Paint::default();
+                paint.set_font(&[state.fonts.regular.unwrap()]);
+                paint.set_font_size(19.);
+                paint.set_color(Color::white());
+                let text = if f == 100 { format!("100 Hz") } else { format!("{f}") };
+                canvas
+                    .fill_text(ax + 5., y + h - 5., text, paint)
+                    .unwrap();
+            } else {
+                path.move_to(ax, y);
+                path.line_to(ax, y + h);
+            }
+        }
+        let mut paint = Paint::color(Color::rgb(130, 130, 130));
+        paint.set_line_width(1.);
+        canvas.stroke_path(&mut path, paint);
+        paint.set_color(Color::rgb(200, 200, 200));
+        canvas.stroke_path(&mut path_strong, paint);
         let mut path = Path::new();
         // let mut points = self.display.get_display().iter().enumerate().map(|(i, v)| {
         //     (
@@ -369,7 +406,7 @@ impl Widget for Plot {
             .fft_display
             .iter()
             .enumerate()
-            .map(|(i, v)| (x + w / N as f32 * i as f32, y + h / 2. - v * h / 200.));
+            .map(|(i, v)| (x + w / N as f32 * i as f32, y + h / 2. - v * h / 180.));
         let (x, y) = points.next().unwrap();
         path.move_to(x, y);
         for (x, y) in points {
@@ -409,6 +446,9 @@ impl Widget for Plot {
                     } else {
                         self.scroll_amount -= SCROLL_AMOUNT;
                     }
+                }
+                WindowEvent::MouseDown(_) => {
+                    self.freeze = !self.freeze;
                 }
                 _ => {}
             }
@@ -475,7 +515,7 @@ impl Widget for Control {
         //     )
         //     .build(state, checkbox, |builder| builder);
         // Label::new("Track").build(state, checkbox, |builder| builder);
-        Label::new("Näytön tasoitus").build(state, entity, |builder| builder);
+        Label::new("Tasoitus").build(state, entity, |builder| builder);
         Slider::new()
             .with_min(0.)
             .with_max(2.)
